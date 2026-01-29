@@ -3,6 +3,21 @@
 <script src="<?php echo base_url() ?>assets/js/sweetalert2.all.min.js"></script>
 
 <style>
+    /* Garante que o SweetAlert apareça acima do modal */
+    /* O modal Bootstrap tem z-index: 99999, então precisamos maior */
+    .swal2-container {
+        z-index: 100000 !important;
+    }
+    
+    .swal2-popup {
+        z-index: 100001 !important;
+    }
+    
+    /* Garante que o SweetAlert seja renderizado no body, não dentro do modal */
+    body > .swal2-container {
+        z-index: 100000 !important;
+    }
+
     .modal-body {
         padding: 20px;
         overflow-y: inherit !important;
@@ -609,6 +624,25 @@
             return null;
         }
 
+        // Função helper para garantir que SweetAlert apareça acima do modal
+        function configurarSweetAlertAcimaModal() {
+            setTimeout(() => {
+                const swalContainer = document.querySelector('.swal2-container');
+                const swalPopup = document.querySelector('.swal2-popup');
+                
+                if (swalContainer) {
+                    swalContainer.style.zIndex = '100000';
+                    // Move para o body se estiver dentro do modal
+                    if (swalContainer.closest('.modal')) {
+                        document.body.appendChild(swalContainer);
+                    }
+                }
+                if (swalPopup) {
+                    swalPopup.style.zIndex = '100001';
+                }
+            }, 10);
+        }
+
         // Função para processar busca automática quando documento é válido
         function processarBuscaAutomatica() {
             let documento = $('#documento').val().trim();
@@ -760,6 +794,7 @@
             }, 200);
             
             // Mostra mensagem de sucesso (não bloqueante, permite continuar preenchendo)
+            // Posiciona acima do modal usando z-index muito alto
             Swal.fire({
                 icon: "success",
                 title: "CPF Válido!",
@@ -768,7 +803,11 @@
                 allowOutsideClick: true,
                 allowEscapeKey: true,
                 timer: 5000,
-                timerProgressBar: true
+                timerProgressBar: true,
+                target: 'body', // Renderiza no body, não dentro do modal
+                didOpen: () => {
+                    configurarSweetAlertAcimaModal();
+                }
             }).then(() => {
                 // Após fechar a mensagem, foca no campo nome se estiver vazio
                 if (!$("#nomeEmitente").val() || $("#nomeEmitente").val().trim() === "") {
@@ -828,13 +867,17 @@
                         // Foca no campo nome para permitir edição se necessário
                         $("#nomeEmitente").focus();
                         
-                        // Mostra mensagem de sucesso
+                        // Mostra mensagem de sucesso (acima do modal)
                         Swal.fire({
                             icon: "success",
                             title: "Dados encontrados!",
                             text: "Os dados foram preenchidos automaticamente. Verifique e ajuste se necessário.",
                             timer: 2000,
-                            showConfirmButton: false
+                            showConfirmButton: false,
+                            target: 'body', // Renderiza no body, não dentro do modal
+                            didOpen: () => {
+                                configurarSweetAlertAcimaModal();
+                            }
                         });
                     } else {
                         // Limpa campos
