@@ -9,6 +9,79 @@ class Mapos extends MY_Controller
         $this->load->model('mapos_model');
     }
 
+    /**
+     * Endpoint para buscar dados de CPF/CNPJ via AJAX
+     * Retorna JSON com dados do documento
+     */
+    public function buscarDadosDocumento()
+    {
+        $documento = $this->input->post('documento');
+        
+        if (empty($documento)) {
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['success' => false, 'message' => 'Documento não informado']));
+            return;
+        }
+
+        $this->load->helper('validation');
+        $docLimpo = preg_replace('/[^0-9]/', '', $documento);
+        
+        // Identifica tipo
+        $tipo = null;
+        if (strlen($docLimpo) === 11) {
+            $tipo = 'CPF';
+        } elseif (strlen($docLimpo) === 14) {
+            $tipo = 'CNPJ';
+        }
+
+        if (!$tipo) {
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['success' => false, 'message' => 'Documento inválido']));
+            return;
+        }
+
+        // Valida documento
+        $valido = verific_cpf_cnpj($documento);
+        
+        if (!$valido) {
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'success' => false, 
+                    'valido' => false,
+                    'message' => 'Documento inválido',
+                    'tipo' => $tipo
+                ]));
+            return;
+        }
+
+        // Para CNPJ, retorna sucesso (frontend fará busca via API)
+        if ($tipo === 'CNPJ') {
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'success' => true,
+                    'valido' => true,
+                    'tipo' => 'CNPJ',
+                    'message' => 'CNPJ válido - buscando dados...'
+                ]));
+            return;
+        }
+
+        // Para CPF, retorna que é válido mas não há dados disponíveis
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'success' => true,
+                'valido' => true,
+                'tipo' => 'CPF',
+                'message' => 'CPF válido',
+                'dados' => null // Não há API pública para CPF
+            ]));
+    }
+
     public function index()
     {
         $status = ['Em Andamento', 'Aguardando Peças'];

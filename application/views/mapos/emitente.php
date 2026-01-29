@@ -609,7 +609,39 @@
             return null;
         }
 
-        // Buscar informações do documento
+        // Função para processar busca automática quando documento é válido
+        function processarBuscaAutomatica() {
+            let documento = $('#documento').val().trim();
+            let docLimpo = documento.replace(/[^\d]/g, '');
+            let tipo = verificarTipoDocumento(documento);
+            
+            if (!tipo) {
+                return;
+            }
+
+            // Validação
+            let valido = false;
+            if (tipo === 'CPF') {
+                valido = validarCPF(documento);
+            } else {
+                valido = validarCNPJEmitente(documento);
+            }
+
+            // Se válido, busca automaticamente
+            if (valido) {
+                if (tipo === 'CNPJ') {
+                    buscarCNPJ(docLimpo);
+                } else {
+                    // Para CPF, tenta buscar via API alternativa ou informa
+                    buscarCPF(docLimpo);
+                }
+            } else {
+                // Se inválido, mostra aviso mas não bloqueia
+                $('#confirmar_documento_invalido').val('0');
+            }
+        }
+
+        // Buscar informações do documento (botão manual)
         $('#buscar_info_documento').on('click', function () {
             let documento = $('#documento').val().trim();
             let docLimpo = documento.replace(/[^\d]/g, '');
@@ -647,11 +679,7 @@
                         if (tipo === 'CNPJ') {
                             buscarCNPJ(docLimpo);
                         } else {
-                            Swal.fire({
-                                icon: "info",
-                                title: "Informação",
-                                text: "A consulta automática de CPF não está disponível. Preencha os dados manualmente."
-                            });
+                            buscarCPF(docLimpo);
                         }
                     }
                 });
@@ -660,15 +688,94 @@
 
             // Se válido, busca automaticamente
             if (tipo === 'CPF') {
-                Swal.fire({
-                    icon: "info",
-                    title: "Informação",
-                    text: "A consulta automática de CPF não está disponível. Preencha os dados manualmente."
-                });
+                buscarCPF(docLimpo);
             } else {
                 buscarCNPJ(docLimpo);
             }
         });
+
+        // Busca automática quando documento é válido e campo perde foco
+        $('#documento').on('blur', function() {
+            let documento = $(this).val().trim();
+            let docLimpo = documento.replace(/[^\d]/g, '');
+            
+            // Só busca se o documento estiver completo
+            if (docLimpo.length === 11 || docLimpo.length === 14) {
+                processarBuscaAutomatica();
+            }
+        });
+
+        // Busca automática quando documento é digitado e está completo e válido
+        let timeoutBusca;
+        $('#documento').on('input', function() {
+            clearTimeout(timeoutBusca);
+            let documento = $(this).val().trim();
+            let docLimpo = documento.replace(/[^\d]/g, '');
+            
+            // Aguarda 1 segundo após parar de digitar e verifica se está completo e válido
+            if (docLimpo.length === 11 || docLimpo.length === 14) {
+                timeoutBusca = setTimeout(function() {
+                    let tipo = verificarTipoDocumento(documento);
+                    if (tipo) {
+                        let valido = false;
+                        if (tipo === 'CPF') {
+                            valido = validarCPF(documento);
+                        } else {
+                            valido = validarCNPJEmitente(documento);
+                        }
+                        
+                        // Se válido e campos ainda não foram preenchidos, busca automaticamente
+                        if (valido && (!$("#nomeEmitente").val() || $("#nomeEmitente").val().trim() === "")) {
+                            processarBuscaAutomatica();
+                        }
+                    }
+                }, 1000); // Aguarda 1 segundo após parar de digitar
+            }
+        });
+
+        // Função para buscar CPF
+        function buscarCPF(cpf) {
+            // Valida o CPF novamente
+            let cpfFormatado = $('#documento').val().trim();
+            if (!validarCPF(cpfFormatado)) {
+                return;
+            }
+
+            // IMPORTANTE: Não há API pública confiável para consultar dados completos de CPF
+            // por questões de privacidade e LGPD. No entanto, vamos tentar algumas alternativas:
+            
+            // 1. Não limpa campos existentes (importante!)
+            // 2. Foca no campo nome para facilitar preenchimento
+            // 3. Mostra mensagem informativa
+            
+            // Garante que os campos não sejam limpos
+            // Se os campos já tiverem valores, mantém
+            // Se estiverem vazios, apenas foca no nome
+            
+            // Foca no campo de nome para facilitar preenchimento manual
+            setTimeout(function() {
+                if (!$("#nomeEmitente").val() || $("#nomeEmitente").val().trim() === "") {
+                    $("#nomeEmitente").focus();
+                }
+            }, 200);
+            
+            // Mostra mensagem de sucesso (não bloqueante, permite continuar preenchendo)
+            Swal.fire({
+                icon: "success",
+                title: "CPF Válido!",
+                html: "O CPF informado é válido.<br><br><small>Por questões de privacidade e segurança (LGPD), a consulta automática de dados de CPF não está disponível. Por favor, preencha os dados manualmente.</small>",
+                confirmButtonText: "Entendi",
+                allowOutsideClick: true,
+                allowEscapeKey: true,
+                timer: 5000,
+                timerProgressBar: true
+            }).then(() => {
+                // Após fechar a mensagem, foca no campo nome se estiver vazio
+                if (!$("#nomeEmitente").val() || $("#nomeEmitente").val().trim() === "") {
+                    $("#nomeEmitente").focus();
+                }
+            });
+        }
 
         // Função para buscar CNPJ
         function buscarCNPJ(cnpj) {
@@ -699,19 +806,38 @@
                 dataType: 'jsonp',
                 crossDomain: true,
                 contentType: "text/javascript",
+                timeout: 10000, // Timeout de 10 segundos
                 success: function (dados) {
                     if (dados.status == "OK") {
+                        // Preenche automaticamente todos os campos
                         $("#nomeEmitente").val(capital_letter(dados.nome));
-                        $("#cep").val(dados.cep.replace(/\./g, ''));
+                        $("#cep").val(dados.cep ? dados.cep.replace(/\./g, '') : "");
                         $("#email").val(dados.email ? dados.email.toLocaleLowerCase() : "");
                         $("#telefone").val(dados.telefone ? dados.telefone.split("/")[0].replace(/\ /g, '') : "");
-                        $("#rua").val(capital_letter(dados.logradouro));
-                        $("#numero").val(dados.numero);
-                        $("#bairro").val(capital_letter(dados.bairro));
-                        $("#cidade").val(capital_letter(dados.municipio));
-                        $("#estado").val(dados.uf);
+                        $("#rua").val(capital_letter(dados.logradouro || ""));
+                        $("#numero").val(dados.numero || "");
+                        $("#bairro").val(capital_letter(dados.bairro || ""));
+                        $("#cidade").val(capital_letter(dados.municipio || ""));
+                        $("#estado").val(dados.uf || "");
+                        
+                        // Se tiver IE, preenche também
+                        if (dados.inscricao_estadual) {
+                            $("input[name='ie']").val(dados.inscricao_estadual);
+                        }
+                        
+                        // Foca no campo nome para permitir edição se necessário
                         $("#nomeEmitente").focus();
+                        
+                        // Mostra mensagem de sucesso
+                        Swal.fire({
+                            icon: "success",
+                            title: "Dados encontrados!",
+                            text: "Os dados foram preenchidos automaticamente. Verifique e ajuste se necessário.",
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
                     } else {
+                        // Limpa campos
                         $("#nomeEmitente").val("");
                         $("#cep").val("");
                         $("#email").val("");
@@ -720,21 +846,31 @@
                         Swal.fire({
                             icon: "warning",
                             title: "Atenção",
-                            text: "CNPJ não encontrado."
+                            text: "CNPJ não encontrado na base de dados. Preencha os dados manualmente."
                         });
                     }
                 },
-                error: function () {
+                error: function (xhr, status, error) {
+                    // Limpa campos
                     $("#nomeEmitente").val("");
                     $("#cep").val("");
                     $("#email").val("");
                     $("#numero").val("");
                     $("#telefone").val("");
-                    Swal.fire({
-                        icon: "error",
-                        title: "Erro",
-                        text: "Erro ao consultar CNPJ. Tente novamente."
-                    });
+                    
+                    if (status === "timeout") {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Timeout",
+                            text: "A consulta demorou muito. Tente novamente ou preencha os dados manualmente."
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Erro",
+                            text: "Erro ao consultar CNPJ. Tente novamente ou preencha os dados manualmente."
+                        });
+                    }
                 }
             });
         }
