@@ -12,96 +12,143 @@
 
 ![Map-OS](https://raw.githubusercontent.com/RamonSilva20/mapos/master/docs/dashboard.png)
 
-### [Instalação](Instalacao_xampp_windows.md)
+## ⚠️ IMPORTANTE: Instalação Apenas via Docker
 
-1. Faça o download dos arquivos.
-2. Extraia o pacote e copie para seu webserver.
-3. Rode o comando `composer install --no-dev` a partir da raiz do projeto.
-4. Acesse sua URL e inicie a instalação, é bem simples, basta preencher as informações no assistente de instalação **MAPOS**.
-5. Configure o email de envio em Configurações > Sistema > E-mail .
-6. Configurar cron jobs para envio de e-mail:
-    ##### Enviar emails pendentes a cada 2 minutos.
-    - */2 * * * * php /var/www/index.php email/process
-    ##### Enviar emails com falha a cada 5 minutos.
-    - */5 * * * * php /var/www/index.php email/retry
+**A partir de agora, este projeto suporta apenas instalação via Docker.** Os métodos de instalação manual foram descontinuados.
 
-    ##### Obs: O path até o index.php (/var/www/) deve ser configurado conforme o seu ambiente
-
-
-### Instalação (Docker)
+### Instalação via Docker
 
 1. Faça o download dos arquivos.
 2. Instale o [Docker](https://docs.docker.com/install/) e o [Docker Compose](https://docs.docker.com/compose/install/).
-3. Entre na pasta `docker` no seu terminal e rode o comando `docker-compose up --force-recreate`.
-4. Acesse a URL `http://localhost:8000/` no navegador e inicie a instalação.
-5. Na etapa de configuração use as seguintes configurações:
+3. Entre na pasta `docker` no seu terminal:
+```bash
+cd docker
 ```
-1. Por favor, insira as informações da sua conexão de banco de dados.
+
+4. Crie um arquivo `.env` com as seguintes configurações:
+```env
+# Configurações do Nginx
+NGINX_HOST=localhost
+NGINX_PORT=8000
+
+# Configurações do MySQL
+MYSQL_MAPOS_VERSION=8.0
+MYSQL_MAPOS_HOST=mysql
+MYSQL_MAPOS_DATABASE=mapos
+MYSQL_MAPOS_USER=mapos
+MYSQL_MAPOS_PASSWORD=mapos
+MYSQL_MAPOS_ROOT_PASSWORD=root
+MYSQL_MAPOS_PORT=3306
+
+# Configurações do phpMyAdmin
+PHP_MY_ADMIN_PORT=8080
+```
+
+5. Execute o comando:
+```bash
+docker-compose up --force-recreate -d
+```
+
+6. Acesse a URL `http://localhost:8000/` no navegador e inicie a instalação.
+
+7. Na etapa de configuração use as seguintes configurações:
+```
 Host: mysql
 Usuário: mapos
 Senha: mapos
 Banco de Dados: mapos
-
-2. Por favor, insira as informações para sua conta de administrador.
-Configure do jeito que quiser.
-
-3. Por favor, insira a URL.
-URL: http://localhost:8000/
 ```
-6. Configure o email de envio em Configurações > Sistema > E-mail .
 
-    ##### Obs: Cuide da pasta `docker/data`, onde é pasta que o mysql do docker salva os arquivos. Se for deletada você perderá seu banco de dados.
-    ##### Obs2: O PhpMyAdmin também e instalado e pode ser acessado em `http://localhost:8080/`.
+8. Configure o email de envio em Configurações > Sistema > E-mail.
 
-### Instalação Automatizada
-Tutorial Instalação: [https://youtu.be/NgXzzBB_2bM?si=FS_R2xq_W0Jnfn33](https://www.youtube.com/watch?v=aZE-LW_YOE4)
-#### Windows 10/11
-1. Execute o Prompt de Comando ou PowerShell como Administrador;
-2. Execute o comando: `PowerShell -command "& { iwr https://raw.githubusercontent.com/RamonSilva20/mapos/master/install.bat -OutFile MapOS_Install.bat }; .\MapOS_Install.bat"`
-3. Siga as instrunções na tela.
+9. Configure cron jobs para envio de e-mail (já configurado automaticamente no Docker):
+    - Enviar emails pendentes a cada 2 minutos.
+    - Enviar emails com falha a cada 5 minutos.
 
-#### Linux (Ubuntu/Debian)
-1. Abra o Terminal ou acesse seu servidor via SSH;
-2. Eleve o privilégio aplicando `sudo su` (Recomendado);
-3. Execute o comando: `curl -o MapOS_Install.sh -L https://raw.githubusercontent.com/RamonSilva20/mapos/master/install.sh && chmod +x MapOS_Install.sh && ./MapOS_Install.sh`
-4. Siga as instruções na tela.
+**Acessos:**
+- **Aplicação:** http://localhost:8000/
+- **phpMyAdmin:** http://localhost:8080/
+
+**⚠️ Importante:** Cuide da pasta `docker/data`, onde o MySQL do Docker salva os arquivos. Se for deletada você perderá seu banco de dados.
+
+### Configuração para Produção com Domínio Próprio
+
+Você pode usar **qualquer domínio** que possua em produção. O sistema aceita qualquer domínio válido.
+
+**Passos para configurar:**
+
+1. Configure o arquivo `.env` na pasta `docker`:
+   - Altere `NGINX_HOST=SEU_DOMINIO_AQUI` (substitua pelo seu domínio real)
+   - Altere `NGINX_PORT=80` (ou `443` para HTTPS)
+   
+   **Exemplos de domínios válidos:**
+   - `meudominio.com.br`
+   - `sistema.empresa.com`
+   - `app.exemplo.net`
+   - Qualquer outro domínio que você possua
+
+2. Configure o DNS do seu domínio para apontar para o IP do servidor (registro Tipo A)
+
+3. Durante a instalação, use a URL completa do seu domínio: `http://SEU_DOMINIO_AQUI/`
+
+4. Reinicie os containers: `docker-compose down && docker-compose up -d`
+
+Para mais detalhes sobre configuração em produção, consulte o [README da pasta docker](docker/README.md).
 
 ### Atualização
 
-1. Faça o backup dos arquivos e do banco de dados:
-2. Logado como administrador vá em `configurações > backup`.
-3. Dentro da pasta `Assets` copie as pastas `anexos`, `arquivos`, `uploads`, `userimage` e qualquer personalização feita dentro da pasta `img`.
-4. Dentro da pasta `application` copie o arquivo `.env`.;
-5. Substitua os arquivos pelos da nova versão.
-6. Rode o comando `composer install --no-dev` a partir da raiz do projeto.
-7. Restaure os backups para seus locais devidos.
-8. Logue no sistema como administrador e navegue até Configurações -> Sistema e clique no botão `Atualizar Banco de Dados` para atualizar seu banco de dados.
-    Obs.: Também é possível atualizar o banco de dados via terminal rodando o comando `php index.php tools migrate` a partir da raiz do projeto;
-9. Pronto, sua atualização está concluída;
+1. Pare o docker de rodar:
+```bash
+cd docker
+docker-compose down
+```
 
-### Atualização (Docker)
-
-1. Pare o docker de rodar;
 2. Faça o backup dos arquivos e do banco de dados:
-3. Logado como administrador vá em `configurações > backup`.
-4. Dentro da pasta `Assets` copie as pastas `anexos`, `arquivos`, `uploads`, `userimage` e qualquer personalização feita dentro da pasta `img`.
-5. Dentro da pasta `application` copie o arquivo `.env`.
-6. Substitua os arquivos pelos da nova versão;
-7. Entre na pasta `docker` no seu terminal e rode o comando `docker-compose up --force-recreate`;
-8. Logue no sistema como administrador e navegue até Configurações -> Sistema e clique no botão `Atualizar Banco de Dados` para atualizar seu banco de dados.
-    Obs.: Também é possível atualizar o banco de dados via terminal rodando o comando `php index.php tools migrate` a partir da raiz do projeto;
-9. Restaure os backups para seus locais devidos;
-10. Pronto, sua atualização está concluída;
+   - Logado como administrador vá em `configurações > backup`.
+   - Dentro da pasta `Assets` copie as pastas `anexos`, `arquivos`, `uploads`, `userimage` e qualquer personalização feita dentro da pasta `img`.
+   - Dentro da pasta `application` copie o arquivo `.env`.
+   - **Importante:** Faça backup da pasta `docker/data/db/mysql` que contém os dados do banco de dados.
 
-### Atualização via sistema
+3. Substitua os arquivos pelos da nova versão.
+
+4. Entre na pasta `docker` no seu terminal e rode o comando:
+```bash
+docker-compose up --force-recreate -d
+```
+
+5. Logue no sistema como administrador e navegue até Configurações -> Sistema e clique no botão `Atualizar Banco de Dados` para atualizar seu banco de dados.
+   - **Alternativa:** Também é possível atualizar o banco de dados via terminal rodando o comando:
+   ```bash
+   docker-compose exec php-fpm php index.php tools migrate
+   ```
+
+6. Restaure os backups para seus locais devidos.
+
+7. Pronto, sua atualização está concluída!
+
+### Atualização via sistema (Docker)
 
 1. Primeiro é necessário atualizar manualmente o sistema para a versão v4.4.0;
 2. Quando estiver nessa versão é possível atualizar o sistema clicando no botão "Atualizar Mapos" em Sistema >> Configurações;
 3. Serão baixados e atualizados todos os arquivos exceto: `config.php`, `database.php` e `email.php`;
+4. Após a atualização, reinicie os containers Docker:
+```bash
+cd docker
+docker-compose restart
+```
 
-### Comandos de terminal
+### Comandos de terminal (Docker)
 
-Para listar todos os comandos de terminal disponíveis, basta executar o comando `php index.php tools` a partir da raiz do projeto, após feita todo o processo de instalação.
+Para listar todos os comandos de terminal disponíveis, execute o comando:
+```bash
+cd docker
+docker-compose exec php-fpm php index.php tools
+```
+
+Para executar comandos específicos, use:
+```bash
+docker-compose exec php-fpm php index.php tools [comando]
+```
 
 ### Hospedagem Parceira
 Em parceria com o Projeto Map-OS a SysGO oferece hospedagem de qualidade e suporte personalizado para usuários dos Map-OS com custo justo e confiabilidade.
