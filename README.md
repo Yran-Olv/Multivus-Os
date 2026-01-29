@@ -16,22 +16,35 @@
 
 **A partir de agora, este projeto suporta apenas instalação via Docker.** Os métodos de instalação manual foram descontinuados.
 
-### Instalação via Docker
+## 📖 Guia Completo de Instalação
 
-1. Faça o download dos arquivos.
-2. Instale o [Docker](https://docs.docker.com/install/) e o [Docker Compose](https://docs.docker.com/compose/install/).
-3. Entre na pasta `docker` no seu terminal:
+Para um tutorial passo a passo completo e detalhado, consulte o **[Guia Completo de Instalação](docker/README.md)** na pasta `docker`.
+
+O guia inclui:
+- ✅ Instalação do Docker (Linux, Windows, macOS)
+- ✅ Download e configuração do projeto
+- ✅ Instalação passo a passo do sistema
+- ✅ Configuração para produção
+- ✅ Troubleshooting e soluções de problemas
+- ✅ Comandos úteis e dicas
+
+### Instalação Rápida (Resumo)
+
+1. **Instale o Docker e Docker Compose:**
+   - Linux: Siga as instruções no [guia completo](docker/README.md)
+   - Windows: [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+   - macOS: [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+2. **Baixe o projeto:**
 ```bash
-cd docker
+git clone https://github.com/RamonSilva20/mapos.git
+cd mapos/docker
 ```
 
-4. Crie um arquivo `.env` com as seguintes configurações:
+3. **Crie o arquivo `.env`:**
 ```env
-# Configurações do Nginx
 NGINX_HOST=localhost
 NGINX_PORT=8000
-
-# Configurações do MySQL
 MYSQL_MAPOS_VERSION=8.0
 MYSQL_MAPOS_HOST=mysql
 MYSQL_MAPOS_DATABASE=mapos
@@ -39,37 +52,29 @@ MYSQL_MAPOS_USER=mapos
 MYSQL_MAPOS_PASSWORD=mapos
 MYSQL_MAPOS_ROOT_PASSWORD=root
 MYSQL_MAPOS_PORT=3306
-
-# Configurações do phpMyAdmin
 PHP_MY_ADMIN_PORT=8080
 ```
 
-5. Execute o comando:
+4. **Inicie os containers:**
 ```bash
-docker-compose up --force-recreate -d
+docker compose up -d --force-recreate
 ```
 
-6. Acesse a URL `http://localhost:8000/` no navegador e inicie a instalação.
-
-7. Na etapa de configuração use as seguintes configurações:
-```
-Host: mysql
-Usuário: mapos
-Senha: mapos
-Banco de Dados: mapos
-```
-
-8. Configure o email de envio em Configurações > Sistema > E-mail.
-
-9. Configure cron jobs para envio de e-mail (já configurado automaticamente no Docker):
-    - Enviar emails pendentes a cada 2 minutos.
-    - Enviar emails com falha a cada 5 minutos.
+5. **Acesse e instale:**
+   - Acesse: `http://localhost:8000/`
+   - Configure o banco de dados:
+     - Host: `mysql`
+     - Usuário: `mapos`
+     - Senha: `mapos`
+     - Banco: `mapos`
 
 **Acessos:**
 - **Aplicação:** http://localhost:8000/
 - **phpMyAdmin:** http://localhost:8080/
 
 **⚠️ Importante:** Cuide da pasta `docker/data`, onde o MySQL do Docker salva os arquivos. Se for deletada você perderá seu banco de dados.
+
+**📚 Para instruções detalhadas, consulte o [Guia Completo](docker/README.md)**
 
 ### Configuração para Produção com Domínio Próprio
 
