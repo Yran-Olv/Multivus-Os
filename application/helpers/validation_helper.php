@@ -128,6 +128,58 @@ if (! function_exists('verific_cpf_cnpj')) {
     }
 }
 
+if (! function_exists('identificar_tipo_documento')) {
+    /**
+     * Identifica se um documento é CPF ou CNPJ
+     * 
+     * @param string $documento Documento com ou sem formatação
+     * @return string|null Retorna 'CPF', 'CNPJ' ou null
+     */
+    function identificar_tipo_documento($documento)
+    {
+        // Remove formatação
+        $doc = preg_replace('/[^0-9A-Z]/', '', strtoupper($documento));
+        
+        // CPF: 11 dígitos numéricos
+        if (strlen($doc) === 11 && ctype_digit($doc)) {
+            return 'CPF';
+        }
+        
+        // CNPJ: 14 caracteres (numéricos ou alfanuméricos)
+        if (strlen($doc) === 14) {
+            return 'CNPJ';
+        }
+        
+        return null;
+    }
+}
+
+if (! function_exists('formatar_documento_emitente')) {
+    /**
+     * Formata a exibição do documento do emitente (CPF ou CNPJ)
+     * 
+     * @param string $documento Documento do emitente
+     * @return string String formatada com "CPF: " ou "CNPJ: "
+     */
+    function formatar_documento_emitente($documento)
+    {
+        if (empty($documento) || $documento == "00.000.000/0000-00" || $documento == "000.000.000-00") {
+            return '';
+        }
+        
+        $tipo = identificar_tipo_documento($documento);
+        
+        if ($tipo === 'CPF') {
+            return 'CPF: ' . $documento;
+        } elseif ($tipo === 'CNPJ') {
+            return 'CNPJ: ' . $documento;
+        }
+        
+        // Se não identificar, mantém como estava (CNPJ por padrão)
+        return 'CNPJ: ' . $documento;
+    }
+}
+
 if (! function_exists('unique')) {
     function unique($value, $params)
     {

@@ -203,8 +203,9 @@ class Mapos extends MY_Controller
         }
 
         $this->load->library('form_validation');
-        $this->form_validation->set_rules('nome', 'Razão Social', 'required|trim');
-        $this->form_validation->set_rules('cnpj', 'CNPJ', 'required|trim');
+        $this->load->helper('validation');
+        $this->form_validation->set_rules('nome', 'Razão Social/Nome', 'required|trim');
+        $this->form_validation->set_rules('cnpj', 'CPF/CNPJ', 'required|trim');
         $this->form_validation->set_rules('ie', 'IE', 'trim');
         $this->form_validation->set_rules('cep', 'CEP', 'required|trim');
         $this->form_validation->set_rules('logradouro', 'Logradouro', 'required|trim');
@@ -220,7 +221,7 @@ class Mapos extends MY_Controller
             redirect(site_url('mapos/emitente'));
         } else {
             $nome = $this->input->post('nome');
-            $cnpj = $this->input->post('cnpj');
+            $documento = $this->input->post('cnpj'); // Pode ser CPF ou CNPJ
             $ie = $this->input->post('ie');
             $cep = $this->input->post('cep');
             $logradouro = $this->input->post('logradouro');
@@ -233,7 +234,19 @@ class Mapos extends MY_Controller
             $image = $this->do_upload();
             $logo = base_url() . 'assets/uploads/' . $image;
 
-            $retorno = $this->mapos_model->addEmitente($nome, $cnpj, $ie, $cep, $logradouro, $numero, $bairro, $cidade, $uf, $telefone, $email, $logo);
+            // Valida CPF/CNPJ (mas permite continuar mesmo se inválido)
+            $documento_valido = verific_cpf_cnpj($documento);
+            if (!$documento_valido) {
+                // Se o documento não for válido, verifica se o usuário confirmou
+                $confirmar_invalido = $this->input->post('confirmar_documento_invalido');
+                if (!$confirmar_invalido) {
+                    // Retorna para o formulário com mensagem
+                    $this->session->set_flashdata('error', 'O CPF ou CNPJ informado não é válido. Verifique os dados ou confirme para continuar mesmo assim.');
+                    redirect(site_url('mapos/emitente'));
+                }
+            }
+
+            $retorno = $this->mapos_model->addEmitente($nome, $documento, $ie, $cep, $logradouro, $numero, $bairro, $cidade, $uf, $telefone, $email, $logo);
             if ($retorno) {
                 $this->session->set_flashdata('success', 'As informações foram inseridas com sucesso.');
                 log_info('Adicionou informações de emitente.');
@@ -252,8 +265,9 @@ class Mapos extends MY_Controller
         }
 
         $this->load->library('form_validation');
-        $this->form_validation->set_rules('nome', 'Razão Social', 'required|trim');
-        $this->form_validation->set_rules('cnpj', 'CNPJ', 'required|trim');
+        $this->load->helper('validation');
+        $this->form_validation->set_rules('nome', 'Razão Social/Nome', 'required|trim');
+        $this->form_validation->set_rules('cnpj', 'CPF/CNPJ', 'required|trim');
         $this->form_validation->set_rules('ie', 'IE', 'trim');
         $this->form_validation->set_rules('cep', 'CEP', 'required|trim');
         $this->form_validation->set_rules('logradouro', 'Logradouro', 'required|trim');
@@ -269,7 +283,7 @@ class Mapos extends MY_Controller
             redirect(site_url('mapos/emitente'));
         } else {
             $nome = $this->input->post('nome');
-            $cnpj = $this->input->post('cnpj');
+            $documento = $this->input->post('cnpj'); // Pode ser CPF ou CNPJ
             $ie = $this->input->post('ie');
             $cep = $this->input->post('cep');
             $logradouro = $this->input->post('logradouro');
@@ -281,7 +295,19 @@ class Mapos extends MY_Controller
             $email = $this->input->post('email');
             $id = $this->input->post('id');
 
-            $retorno = $this->mapos_model->editEmitente($id, $nome, $cnpj, $ie, $cep, $logradouro, $numero, $bairro, $cidade, $uf, $telefone, $email);
+            // Valida CPF/CNPJ (mas permite continuar mesmo se inválido)
+            $documento_valido = verific_cpf_cnpj($documento);
+            if (!$documento_valido) {
+                // Se o documento não for válido, verifica se o usuário confirmou
+                $confirmar_invalido = $this->input->post('confirmar_documento_invalido');
+                if (!$confirmar_invalido) {
+                    // Retorna para o formulário com mensagem
+                    $this->session->set_flashdata('error', 'O CPF ou CNPJ informado não é válido. Verifique os dados ou confirme para continuar mesmo assim.');
+                    redirect(site_url('mapos/emitente'));
+                }
+            }
+
+            $retorno = $this->mapos_model->editEmitente($id, $nome, $documento, $ie, $cep, $logradouro, $numero, $bairro, $cidade, $uf, $telefone, $email);
             if ($retorno) {
                 $this->session->set_flashdata('success', 'As informações foram alteradas com sucesso.');
                 log_info('Alterou informações de emitente.');

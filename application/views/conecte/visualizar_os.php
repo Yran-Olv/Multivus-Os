@@ -28,7 +28,15 @@ $totalProdutos = 0; ?>
                                         <td style="width: 25%"><img src=" <?php echo $emitente->url_logo; ?> " style="max-height: 100px"></td>
                                         <td>
                                             <span style="font-size: 20px;"><?php echo $emitente->nome; ?></span></br>
-                                            <?php if ($emitente->cnpj != "00.000.000/0000-00") { ?><span class="icon"><i class="fas fa-fingerprint" style="margin:5px 1px"></i> <?php echo $emitente->cnpj; ?></span></br><?php } ?>
+                                            <?php 
+                                            $this->load->helper('validation');
+                                            if ($emitente->cnpj != "00.000.000/0000-00" && $emitente->cnpj != "000.000.000-00") { 
+                                                $doc_formatado = formatar_documento_emitente($emitente->cnpj);
+                                                if (!empty($doc_formatado)) {
+                                                    echo '<span class="icon"><i class="fas fa-fingerprint" style="margin:5px 1px"></i> ' . $doc_formatado . '</span></br>';
+                                                }
+                                            } 
+                                            ?>
                                             <span class="icon"><i class="fas fa-map-marker-alt" style="margin:4px 3px"></i> <?php echo $emitente->rua . ', ' . $emitente->numero . ', ' . $emitente->bairro . ' - ' . $emitente->cidade . ' - ' . $emitente->uf; ?></span></br>
                                             <span class="icon"><i class="fas fa-comments" style="margin:5px 1px"></i> E-mail: <?php echo $emitente->email . ' - Fone: ' . $emitente->telefone; ?></span></br>
                                             <span class="icon"><i class="fas fa-user-check"></i> Responsável: <?php echo $result->nome ?>

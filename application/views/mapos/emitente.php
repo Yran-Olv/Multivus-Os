@@ -79,14 +79,15 @@
                 <div class="control-group">
                     <label for="nome" class="control-label"><span class="required"></span></label>
                     <div class="controls">
-                        <input id="nomeEmitente" placeholder="Razão Social*" type="text" name="nome" value="" />
+                        <input id="nomeEmitente" placeholder="Razão Social/Nome*" type="text" name="nome" value="" />
                     </div>
                 </div>
                 <div class="control-group">
-                    <label for="cnpj" class="control-label"><span class="required"></span></label>
+                    <label for="cnpj" class="control-label"><span class="required">CPF/CNPJ*</span></label>
                     <div class="controls">
-                        <input class="cnpjEmitente" placeholder="CNPJ*" id="documento" type="text" name="cnpj" value="" title="Para ocultar o CNPJ digite 00.000.000/000-00" />
-                        <button style="top:34px;right:40px;position:absolute" id="buscar_info_cnpj" class="btn btn-xs" type="button"><i class="fas fa-search"></i></button>
+                        <input class="documentoEmitente" placeholder="CPF ou CNPJ*" id="documento" type="text" name="cnpj" value="" title="Digite CPF (11 dígitos) ou CNPJ (14 dígitos). Para ocultar digite 00.000.000/0000-00" />
+                        <button style="top:34px;right:40px;position:absolute" id="buscar_info_documento" class="btn btn-xs" type="button"><i class="fas fa-search"></i></button>
+                        <input type="hidden" name="confirmar_documento_invalido" id="confirmar_documento_invalido" value="0" />
                     </div>
                 </div>
                 <div class="control-group">
@@ -175,7 +176,14 @@
                                 <td style="width: 25%"><img src="<?= $dados->url_logo; ?>"></td>
                                 <td>
                                     <span style="font-size: 20px; "><b><?= $dados->nome; ?></b></span></br>
-                                    <i class="fas fa-fingerprint" style="margin:5px 1px"></i> <?= $dados->cnpj; ?> <?php if (!empty($dados->ie)) {
+                                    <i class="fas fa-fingerprint" style="margin:5px 1px"></i> <?php 
+                                        $documento = preg_replace('/[^0-9]/', '', $dados->cnpj);
+                                        if (strlen($documento) == 11) {
+                                            echo 'CPF: ' . $dados->cnpj;
+                                        } else {
+                                            echo 'CNPJ: ' . $dados->cnpj;
+                                        }
+                                    ?> <?php if (!empty($dados->ie)) {
                                         echo ' - IE:' . $dados->ie;
                                     } ?></br>
                                     <i class="fas fa-map-marker-alt" style="margin:4px 3px"></i> <?= $dados->rua . ', ' . $dados->numero . ', ' . $dados->bairro . ' - ' . $dados->cep . ', ' . $dados->cidade . '/' . $dados->uf; ?></br>
@@ -207,15 +215,16 @@
                 <div class="control-group">
                     <label for="nome" class="control-label"><span class="required"></span></label>
                     <div class="controls">
-                        <input id="nomeEmitente" type="text" name="nome" value="<?= $dados->nome; ?>" placeholder="Razão Social*" />
+                        <input id="nomeEmitente" type="text" name="nome" value="<?= $dados->nome; ?>" placeholder="Razão Social/Nome*" />
                         <input id="nome" type="hidden" name="id" value="<?= $dados->id; ?>" />
                     </div>
                 </div>
                 <div class="control-group">
-                    <label for="cnpj" class="control-label"><span class="required"></span></label>
+                    <label for="cnpj" class="control-label"><span class="required">CPF/CNPJ*</span></label>
                     <div class="controls">
-                        <input class="cnpjEmitente" type="text" id="documento" name="cnpj" value="<?= $dados->cnpj; ?>" placeholder="CNPJ*" title="Para ocultar o CNPJ digite 00.000.000/000-00" />
-                        <button style="top:34px;right:40px;position:absolute" id="buscar_info_cnpj" class="btn btn-xs" type="button"><i class="fas fa-search"></i></button>
+                        <input class="documentoEmitente" type="text" id="documento" name="cnpj" value="<?= $dados->cnpj; ?>" placeholder="CPF ou CNPJ*" title="Digite CPF (11 dígitos) ou CNPJ (14 dígitos). Para ocultar digite 00.000.000/0000-00" />
+                        <button style="top:34px;right:40px;position:absolute" id="buscar_info_documento" class="btn btn-xs" type="button"><i class="fas fa-search"></i></button>
+                        <input type="hidden" name="confirmar_documento_invalido" id="confirmar_documento_invalido" value="0" />
                     </div>
                 </div>
                 <div class="control-group">
@@ -488,5 +497,297 @@
                 $(element).parents('.control-group').addClass('success');
             }
         });
+
+        // Máscara dinâmica para CPF/CNPJ no emitente
+        $('#documento').on('input', function () {
+            let v = $(this).val().replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+            let result = '';
+            // CPF: 11 dígitos numéricos
+            if (/^\d{0,11}$/.test(v)) {
+                for (let i = 0; i < v.length && i < 11; i++) {
+                    if (i === 3 || i === 6) result += '.';
+                    if (i === 9) result += '-';
+                    result += v[i];
+                }
+                $(this).val(result);
+            }
+            // CNPJ tradicional: 14 dígitos numéricos
+            else if (/^\d{12,14}$/.test(v) && !/[A-Z]/.test(v)) {
+                for (let i = 0; i < v.length && i < 14; i++) {
+                    if (i === 2 || i === 5) result += '.';
+                    if (i === 8) result += '/';
+                    if (i === 12) result += '-';
+                    result += v[i];
+                }
+                $(this).val(result);
+            }
+            // CNPJ alfanumérico: 14 caracteres (letras e números)
+            else {
+                for (let i = 0; i < v.length && i < 14; i++) {
+                    if (i === 2 || i === 5) result += '.';
+                    if (i === 8) result += '/';
+                    if (i === 12) result += '-';
+                    result += v[i];
+                }
+                $(this).val(result);
+            }
+        });
+
+        // Função para validar CPF
+        function validarCPF(cpf) {
+            cpf = cpf.replace(/[^\d]/g, '');
+            if (cpf.length !== 11) return false;
+            if (/^(\d)\1{10}$/.test(cpf)) return false;
+            
+            let soma = 0;
+            for (let i = 0; i < 9; i++) {
+                soma += parseInt(cpf.charAt(i)) * (10 - i);
+            }
+            let resto = (soma * 10) % 11;
+            if (resto === 10 || resto === 11) resto = 0;
+            if (resto !== parseInt(cpf.charAt(9))) return false;
+            
+            soma = 0;
+            for (let i = 0; i < 10; i++) {
+                soma += parseInt(cpf.charAt(i)) * (11 - i);
+            }
+            resto = (soma * 10) % 11;
+            if (resto === 10 || resto === 11) resto = 0;
+            if (resto !== parseInt(cpf.charAt(10))) return false;
+            
+            return true;
+        }
+
+        // Função para validar CNPJ (já existe no funcoes.js, mas vamos usar aqui também)
+        function validarCNPJEmitente(cnpj) {
+            cnpj = cnpj.replace(/[^\w]/g, '').toUpperCase();
+            
+            // CNPJ numérico tradicional
+            if (/^\d{14}$/.test(cnpj)) {
+                if (/^(\d)\1{13}$/.test(cnpj)) return false;
+                
+                let tamanho = cnpj.length - 2;
+                let numeros = cnpj.substring(0, tamanho);
+                let digitos = cnpj.substring(tamanho);
+                
+                let soma = 0;
+                let pos = tamanho - 7;
+                for (let i = tamanho; i >= 1; i--) {
+                    soma += parseInt(numeros.charAt(tamanho - i)) * pos--;
+                    if (pos < 2) pos = 9;
+                }
+                
+                let resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+                if (resultado != parseInt(digitos.charAt(0))) return false;
+                
+                tamanho = tamanho + 1;
+                numeros = cnpj.substring(0, tamanho);
+                soma = 0;
+                pos = tamanho - 7;
+                for (let i = tamanho; i >= 1; i--) {
+                    soma += parseInt(numeros.charAt(tamanho - i)) * pos--;
+                    if (pos < 2) pos = 9;
+                }
+                resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+                
+                return resultado == parseInt(digitos.charAt(1));
+            }
+            
+            // CNPJ alfanumérico - aceita formato válido
+            if (/^[A-Z0-9]{14}$/.test(cnpj)) {
+                return true;
+            }
+            
+            return false;
+        }
+
+        // Função para verificar se é CPF ou CNPJ
+        function verificarTipoDocumento(documento) {
+            let doc = documento.replace(/[^\d]/g, '');
+            if (doc.length === 11) return 'CPF';
+            if (doc.length === 14) return 'CNPJ';
+            return null;
+        }
+
+        // Buscar informações do documento
+        $('#buscar_info_documento').on('click', function () {
+            let documento = $('#documento').val().trim();
+            let docLimpo = documento.replace(/[^\d]/g, '');
+            let tipo = verificarTipoDocumento(documento);
+            
+            if (!tipo) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Atenção",
+                    text: "Por favor, digite um CPF (11 dígitos) ou CNPJ (14 dígitos) válido."
+                });
+                return;
+            }
+
+            // Validação
+            let valido = false;
+            if (tipo === 'CPF') {
+                valido = validarCPF(documento);
+            } else {
+                valido = validarCNPJEmitente(documento);
+            }
+
+            if (!valido) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Documento Inválido",
+                    text: "O " + tipo + " informado não é válido. Deseja continuar mesmo assim?",
+                    showCancelButton: true,
+                    confirmButtonText: "Sim, continuar",
+                    cancelButtonText: "Cancelar"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $('#confirmar_documento_invalido').val('1');
+                        // Se for CNPJ, tenta buscar mesmo assim
+                        if (tipo === 'CNPJ') {
+                            buscarCNPJ(docLimpo);
+                        } else {
+                            Swal.fire({
+                                icon: "info",
+                                title: "Informação",
+                                text: "A consulta automática de CPF não está disponível. Preencha os dados manualmente."
+                            });
+                        }
+                    }
+                });
+                return;
+            }
+
+            // Se válido, busca automaticamente
+            if (tipo === 'CPF') {
+                Swal.fire({
+                    icon: "info",
+                    title: "Informação",
+                    text: "A consulta automática de CPF não está disponível. Preencha os dados manualmente."
+                });
+            } else {
+                buscarCNPJ(docLimpo);
+            }
+        });
+
+        // Função para buscar CNPJ
+        function buscarCNPJ(cnpj) {
+            // Se for CNPJ alfanumérico, não busca
+            if (/^[A-Z0-9]{14}$/.test(cnpj.replace(/[^\w]/g, '').toUpperCase()) && /[A-Z]/.test(cnpj)) {
+                Swal.fire({
+                    icon: "info",
+                    title: "Atenção",
+                    text: "A consulta automática ainda não está disponível para o novo formato de CNPJ alfanumérico. Preencha os dados manualmente."
+                });
+                return;
+            }
+
+            // Preenche campos com "..." enquanto consulta
+            $("#nomeEmitente").val("...");
+            $("#email").val("...");
+            $("#cep").val("...");
+            $("#rua").val("...");
+            $("#numero").val("...");
+            $("#bairro").val("...");
+            $("#cidade").val("...");
+            $("#estado").val("...");
+            $("#telefone").val("...");
+
+            // Consulta webservice
+            $.ajax({
+                url: "https://www.receitaws.com.br/v1/cnpj/" + cnpj,
+                dataType: 'jsonp',
+                crossDomain: true,
+                contentType: "text/javascript",
+                success: function (dados) {
+                    if (dados.status == "OK") {
+                        $("#nomeEmitente").val(capital_letter(dados.nome));
+                        $("#cep").val(dados.cep.replace(/\./g, ''));
+                        $("#email").val(dados.email ? dados.email.toLocaleLowerCase() : "");
+                        $("#telefone").val(dados.telefone ? dados.telefone.split("/")[0].replace(/\ /g, '') : "");
+                        $("#rua").val(capital_letter(dados.logradouro));
+                        $("#numero").val(dados.numero);
+                        $("#bairro").val(capital_letter(dados.bairro));
+                        $("#cidade").val(capital_letter(dados.municipio));
+                        $("#estado").val(dados.uf);
+                        $("#nomeEmitente").focus();
+                    } else {
+                        $("#nomeEmitente").val("");
+                        $("#cep").val("");
+                        $("#email").val("");
+                        $("#numero").val("");
+                        $("#telefone").val("");
+                        Swal.fire({
+                            icon: "warning",
+                            title: "Atenção",
+                            text: "CNPJ não encontrado."
+                        });
+                    }
+                },
+                error: function () {
+                    $("#nomeEmitente").val("");
+                    $("#cep").val("");
+                    $("#email").val("");
+                    $("#numero").val("");
+                    $("#telefone").val("");
+                    Swal.fire({
+                        icon: "error",
+                        title: "Erro",
+                        text: "Erro ao consultar CNPJ. Tente novamente."
+                    });
+                }
+            });
+        }
+
+        // Validação antes de submeter formulário
+        $('#formCadastrar, #formAlterar').on('submit', function(e) {
+            let documento = $('#documento').val().trim();
+            let docLimpo = documento.replace(/[^\d]/g, '');
+            let tipo = verificarTipoDocumento(documento);
+            
+            if (!tipo) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: "error",
+                    title: "Erro",
+                    text: "Por favor, digite um CPF (11 dígitos) ou CNPJ (14 dígitos) válido."
+                });
+                return false;
+            }
+
+            let valido = false;
+            if (tipo === 'CPF') {
+                valido = validarCPF(documento);
+            } else {
+                valido = validarCNPJEmitente(documento);
+            }
+
+            if (!valido && $('#confirmar_documento_invalido').val() !== '1') {
+                e.preventDefault();
+                Swal.fire({
+                    icon: "warning",
+                    title: "Documento Inválido",
+                    text: "O " + tipo + " informado não é válido. Deseja continuar mesmo assim?",
+                    showCancelButton: true,
+                    confirmButtonText: "Sim, continuar",
+                    cancelButtonText: "Cancelar"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $('#confirmar_documento_invalido').val('1');
+                        $('#formCadastrar, #formAlterar').off('submit').submit();
+                    }
+                });
+                return false;
+            }
+        });
+
+        function capital_letter(str) {
+            if (typeof str === 'undefined') { return; }
+            str = str.toLocaleLowerCase().split(" ");
+            for (var i = 0, x = str.length; i < x; i++) {
+                str[i] = str[i][0].toUpperCase() + str[i].substr(1);
+            }
+            return str.join(" ");
+        }
     });
 </script>

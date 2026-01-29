@@ -93,7 +93,15 @@ $totalProdutos = 0; ?>
                                     <tr>
                                         <td colspan="5" style="text-align: center; font-size: 11px;" >
                                             <span style="font-size: 12px; text-transform: uppercase"><b><?php echo $emitente->nome; ?></b></br></span>
-                                            <?php if ($emitente->cnpj != "00.000.000/0000-00") { ?><span class="icon"><i class="fas fa-fingerprint" style="margin:5px 1px"></i> <?php echo $emitente->cnpj; ?></span></br><?php } ?>
+                                            <?php 
+                                            $this->load->helper('validation');
+                                            if ($emitente->cnpj != "00.000.000/0000-00" && $emitente->cnpj != "000.000.000-00") { 
+                                                $doc_formatado = formatar_documento_emitente($emitente->cnpj);
+                                                if (!empty($doc_formatado)) {
+                                                    echo '<span class="icon"><i class="fas fa-fingerprint" style="margin:5px 1px"></i> ' . $doc_formatado . '</span></br>';
+                                                }
+                                            } 
+                                            ?>
                                             <span><?php echo $emitente->rua . ', ' . $emitente->numero . '</br>' . $emitente->bairro . ', ' . $emitente->cidade . ' - ' . $emitente->uf; ?></span></br>
                                             <span><?php echo $emitente->email; ?> - <?php echo $emitente->telefone; ?></span>
                                         </td>
@@ -301,7 +309,15 @@ $totalProdutos = 0; ?>
                                     <tr>
                                         <td colspan="5" style="text-align: center; font-size: 11px;" >
                                             <span style="font-size: 12px; text-transform: uppercase"><b><?php echo $emitente->nome; ?></b></br></span>
-                                            <?php if ($emitente->cnpj != "00.000.000/0000-00") { ?><span class="icon"><i class="fas fa-fingerprint" style="margin:5px 1px"></i> <?php echo $emitente->cnpj; ?></span></br><?php } ?>
+                                            <?php 
+                                            $this->load->helper('validation');
+                                            if ($emitente->cnpj != "00.000.000/0000-00" && $emitente->cnpj != "000.000.000-00") { 
+                                                $doc_formatado = formatar_documento_emitente($emitente->cnpj);
+                                                if (!empty($doc_formatado)) {
+                                                    echo '<span class="icon"><i class="fas fa-fingerprint" style="margin:5px 1px"></i> ' . $doc_formatado . '</span></br>';
+                                                }
+                                            } 
+                                            ?>
                                             <span><?php echo $emitente->rua . ', ' . $emitente->numero . '</br>' . $emitente->bairro . ', ' . $emitente->cidade . ' - ' . $emitente->uf; ?></span></br>
                                             <span><?php echo $emitente->email; ?> - <?php echo $emitente->telefone; ?></span>
                                         </td>

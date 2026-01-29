@@ -36,7 +36,11 @@
                                     <tr>
                                         <td colspan="4" style="text-align: center;"> <span style="font-size: 20px;">
                                                 <b><?php echo $emitente->nome; ?></b></span> </br><span>
-                                                <?php echo 'CNPJ: ' . $emitente->cnpj; ?> </br>
+                                                <?php 
+                                                $this->load->helper('validation');
+                                                $doc_formatado = formatar_documento_emitente($emitente->cnpj);
+                                                echo !empty($doc_formatado) ? $doc_formatado : 'CNPJ: ' . $emitente->cnpj;
+                                                ?> </br>
                                                 <?php echo $emitente->rua . ', ' . $emitente->numero . ', ' . $emitente->bairro . ' - ' . $emitente->cidade . ' - ' . $emitente->uf; ?> </span> </br>
                                             <span><?php echo 'Fone: ' . $emitente->telefone; ?></span>
                                         </td>

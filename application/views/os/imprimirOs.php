@@ -26,9 +26,17 @@ $totalProdutos = 0;
                     </div>
                     <div class="emitente">
                         <span style="font-size: 16px;"><b><?= $emitente->nome ?></b></span></br>
-                        <?php if ($emitente->cnpj != "00.000.000/0000-00") : ?>
-                            <span class="align-middle">CNPJ: <?= $emitente->cnpj ?></span></br>
-                        <?php endif; ?>
+                        <?php 
+                        $this->load->helper('validation');
+                        if ($emitente->cnpj != "00.000.000/0000-00" && $emitente->cnpj != "000.000.000-00") : 
+                            $doc_formatado = formatar_documento_emitente($emitente->cnpj);
+                            if (!empty($doc_formatado)) :
+                        ?>
+                            <span class="align-middle"><?= $doc_formatado ?></span></br>
+                        <?php 
+                            endif;
+                        endif; 
+                        ?>
                         <span class="align-middle">
                             <?= $emitente->rua.', '.$emitente->numero.', '.$emitente->bairro ?><br>
                             <?= $emitente->cidade.' - '.$emitente->uf.' - '.$emitente->cep ?>
@@ -278,9 +286,16 @@ $totalProdutos = 0;
                         </div>
                         <div class="emitente">
                             <span style="font-size: 16px;"><b><?= $emitente->nome ?></b></span></br>
-                            <?php if ($emitente->cnpj != "00.000.000/0000-00") : ?>
-                                <span class="align-middle">CNPJ: <?= $emitente->cnpj ?></span></br>
-                            <?php endif; ?>
+                            <?php 
+                            if ($emitente->cnpj != "00.000.000/0000-00" && $emitente->cnpj != "000.000.000-00") : 
+                                $doc_formatado = formatar_documento_emitente($emitente->cnpj);
+                                if (!empty($doc_formatado)) :
+                            ?>
+                                <span class="align-middle"><?= $doc_formatado ?></span></br>
+                            <?php 
+                                endif;
+                            endif; 
+                            ?>
                             <span class="align-middle">
                                 <?= $emitente->rua.', '.$emitente->numero.', '.$emitente->bairro ?><br>
                                 <?= $emitente->cidade.' - '.$emitente->uf.' - '.$emitente->cep ?>
@@ -534,9 +549,16 @@ $totalProdutos = 0; ?>
                         </div>
                         <div style="padding-left: 10px; padding-right: 10px; margin-top: 3px;">
                             <span style="font-size: 16px;"><b><?= $emitente->nome ?></b></span></br>
-                            <?php if ($emitente->cnpj != "00.000.000/0000-00") : ?>
-                                <span class="align-middle">CNPJ: <?= $emitente->cnpj ?></span></br>
-                            <?php endif; ?>
+                            <?php 
+                            if ($emitente->cnpj != "00.000.000/0000-00" && $emitente->cnpj != "000.000.000-00") : 
+                                $doc_formatado = formatar_documento_emitente($emitente->cnpj);
+                                if (!empty($doc_formatado)) :
+                            ?>
+                                <span class="align-middle"><?= $doc_formatado ?></span></br>
+                            <?php 
+                                endif;
+                            endif; 
+                            ?>
                             <span class="align-middle">
                                 <?= $emitente->rua.', '.$emitente->numero.', '.$emitente->bairro ?><br>
                                 <?= $emitente->cidade.' - '.$emitente->uf.' - '.$emitente->cep ?>

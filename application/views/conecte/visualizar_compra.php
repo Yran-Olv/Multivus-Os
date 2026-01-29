@@ -30,7 +30,11 @@
                                         <td style="width: 25%"><img src=" <?php echo $emitente->url_logo; ?> "></td>
                                         <td> <span style="font-size: 20px; ">
                                                 <?php echo $emitente->nome; ?></span> </br><span>
-                                                <?php echo $emitente->cnpj; ?> </br>
+                                                <?php 
+                                                $this->load->helper('validation');
+                                                $doc_formatado = formatar_documento_emitente($emitente->cnpj);
+                                                echo !empty($doc_formatado) ? $doc_formatado : $emitente->cnpj;
+                                                ?> </br>
                                                 <?php echo $emitente->rua . ', nº:' . $emitente->numero . ', ' . $emitente->bairro . ' - ' . $emitente->cidade . ' - ' . $emitente->uf; ?> </span> </br> <span> E-mail:
                                                 <?php echo $emitente->email . ' - Fone: ' . $emitente->telefone; ?> </br>
                                                 Responsável: <?php echo $result->nome ?></span></td>

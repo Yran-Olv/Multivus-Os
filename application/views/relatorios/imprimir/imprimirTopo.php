@@ -9,7 +9,11 @@
             <?php } ?>
         </div>
         <div style="float: right">
-            <b>EMPRESA: </b> <?= $emitente->nome ?> <b>CNPJ: </b> <?= $emitente->cnpj ?><br>
+            <?php 
+            $this->load->helper('validation');
+            $doc_formatado = formatar_documento_emitente($emitente->cnpj);
+            ?>
+            <b>EMPRESA: </b> <?= $emitente->nome ?> <b><?= !empty($doc_formatado) ? $doc_formatado : 'CNPJ: ' . $emitente->cnpj ?></b><br>
             <b>ENDEREÇO: </b> <?= $emitente->rua ?>, <?= $emitente->numero ?>, <?= $emitente->bairro ?>, <?= $emitente->cidade ?> - <?= $emitente->uf ?> <br>
 
             <?php if (isset($title)): ?>
