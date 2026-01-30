@@ -14,10 +14,16 @@
     <div class="span12" style="margin-left: 0">
         <form method="get" action="<?php echo base_url(); ?>index.php/vendas/gerenciar">
             <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'aVenda')) { ?>
-                <div class="span3">
+                <div class="span2">
                     <a href="<?php echo base_url(); ?>index.php/vendas/adicionar" class="button btn btn-mini btn-success" style="max-width: 160px">
                         <span class="button__icon"><i class='bx bx-plus-circle'></i></span>
                         <span class="button__text2">Nova Venda</span>
+                    </a>
+                </div>
+                <div class="span2">
+                    <a href="<?php echo base_url(); ?>index.php/vendas/pdv" class="button btn btn-mini btn-primary" style="max-width: 160px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <span class="button__icon"><i class='bx bx-store'></i></span>
+                        <span class="button__text2">PDV</span>
                     </a>
                 </div>
             <?php } ?>

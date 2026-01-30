@@ -101,6 +101,20 @@ class Mapos extends MY_Controller
         $this->data['financeiro_mes_dia'] = $this->mapos_model->getEstatisticasFinanceiroDia($this->input->get('year'));
         $this->data['financeiro_mes'] = $this->mapos_model->getEstatisticasFinanceiroMes($this->input->get('year'));
         $this->data['financeiro_mesinadipl'] = $this->mapos_model->getEstatisticasFinanceiroMesInadimplencia($this->input->get('year'));
+        
+        // Notificações de vendas a prazo
+        $this->load->model('vendas_prazo_model');
+        $this->data['notificacoes_vendas'] = $this->vendas_prazo_model->getNotificacoes(
+            $this->session->userdata('id_admin'),
+            false, // Não lidas
+            null, // Todos os tipos
+            10 // Limite
+        );
+        $this->data['count_notificacoes_nao_lidas'] = $this->vendas_prazo_model->countNotificacoesNaoLidas($this->session->userdata('id_admin'));
+        
+        // Estatísticas de vendas a prazo
+        $this->data['estatisticas_vendas_prazo'] = $this->vendas_prazo_model->getEstatisticas();
+        
         $this->data['menuPainel'] = 'Painel';
         $this->data['view'] = 'mapos/painel';
 

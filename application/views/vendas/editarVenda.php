@@ -256,6 +256,46 @@ foreach ($produtos as $p) {
                     <input class="span12 money" id="faturar-desconto" type="text" name="faturar-desconto" value="<?php echo number_format($result->valor_desconto, 2, '.', ''); ?> " />
                 </div>
             </div>
+            <!-- Tipo de Venda -->
+            <div class="span12" style="margin-left: 0; margin-bottom: 15px;">
+                <div class="span6">
+                    <label for="tipo_venda">Tipo de Venda*</label>
+                    <select name="tipo_venda" id="tipo_venda" class="span12" required>
+                        <option value="avista">À Vista</option>
+                        <option value="aprazo">A Prazo</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Opções de Venda a Prazo (oculto por padrão) -->
+            <div id="opcoes_prazo" class="span12" style="margin-left: 0; display: none; margin-bottom: 15px; padding: 10px; background: #f9f9f9; border-radius: 5px;">
+                <h5 style="margin-top: 0;">Configurações de Venda a Prazo</h5>
+                <div class="span12" style="margin-left: 0;">
+                    <div class="span3">
+                        <label for="numero_parcelas">Número de Parcelas*</label>
+                        <input type="number" name="numero_parcelas" id="numero_parcelas" class="span12" min="2" max="60" value="2">
+                    </div>
+                    <div class="span3">
+                        <label for="intervalo_parcelas">Intervalo (dias)*</label>
+                        <input type="number" name="intervalo_parcelas" id="intervalo_parcelas" class="span12" min="1" max="365" value="30">
+                    </div>
+                    <div class="span3">
+                        <label for="taxa_juros">Taxa Juros (% ao mês)</label>
+                        <input type="text" name="taxa_juros" id="taxa_juros" class="span12 money" value="0,00">
+                    </div>
+                    <div class="span3">
+                        <label for="taxa_multa">Taxa Multa (% por atraso)</label>
+                        <input type="text" name="taxa_multa" id="taxa_multa" class="span12 money" value="0,00">
+                    </div>
+                </div>
+                <div class="span12" style="margin-left: 0; margin-top: 10px;">
+                    <div class="span6">
+                        <label for="data_primeiro_vencimento">Data Primeiro Vencimento*</label>
+                        <input class="span12 datepicker" autocomplete="off" id="data_primeiro_vencimento" type="text" name="data_primeiro_vencimento" />
+                    </div>
+                </div>
+            </div>
+
             <div class="span12" style="margin-left: 0">
                 <div class="span4" style="margin-left: 0">
                     <label for="vencimento">Data Entrada*</label>
@@ -264,7 +304,7 @@ foreach ($produtos as $p) {
             </div>
             <div class="span12" style="margin-left: 0">
                 <div class="span4" style="margin-left: 0">
-                    <label for="recebido">Recebido?</label>
+                    <label for="recebido">Recebido? (Apenas para venda à vista)</label>
                     &nbsp &nbsp &nbsp &nbsp<input id="recebido" type="checkbox" name="recebido" value="1" />
                 </div>
                 <div id="divRecebimento" class="span8" style=" display: none">
@@ -375,6 +415,38 @@ foreach ($produtos as $p) {
 
     $(document).ready(function() {
         $(".money").maskMoney();
+        
+        // Controlar tipo de venda (à vista ou a prazo)
+        $('#tipo_venda').on('change', function() {
+            if ($(this).val() === 'aprazo') {
+                $('#opcoes_prazo').show();
+                $('#recebido').prop('disabled', true).prop('checked', false);
+                $('#divRecebimento').hide();
+                // Calcular data primeiro vencimento (30 dias a partir de hoje)
+                var dataPrimeiroVenc = new Date();
+                dataPrimeiroVenc.setDate(dataPrimeiroVenc.getDate() + parseInt($('#intervalo_parcelas').val() || 30));
+                var dia = String(dataPrimeiroVenc.getDate()).padStart(2, '0');
+                var mes = String(dataPrimeiroVenc.getMonth() + 1).padStart(2, '0');
+                var ano = dataPrimeiroVenc.getFullYear();
+                $('#data_primeiro_vencimento').val(dia + '/' + mes + '/' + ano);
+            } else {
+                $('#opcoes_prazo').hide();
+                $('#recebido').prop('disabled', false);
+            }
+        });
+
+        // Atualizar data primeiro vencimento quando intervalo mudar
+        $('#intervalo_parcelas').on('change', function() {
+            if ($('#tipo_venda').val() === 'aprazo') {
+                var dataPrimeiroVenc = new Date();
+                dataPrimeiroVenc.setDate(dataPrimeiroVenc.getDate() + parseInt($(this).val() || 30));
+                var dia = String(dataPrimeiroVenc.getDate()).padStart(2, '0');
+                var mes = String(dataPrimeiroVenc.getMonth() + 1).padStart(2, '0');
+                var ano = dataPrimeiroVenc.getFullYear();
+                $('#data_primeiro_vencimento').val(dia + '/' + mes + '/' + ano);
+            }
+        });
+        
         $('#recebido').click(function(event) {
             var flag = $(this).is(':checked');
             if (flag == true) {

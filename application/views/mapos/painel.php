@@ -93,6 +93,17 @@
                 </div>
             </a>
         </li>
+        <li class="card">
+            <a class="cardLink" href="<?= site_url('vendas/pdv') ?>" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="grid-blak">
+                    <div class="numbers N-tittle" style="color: white;">PDV</div>
+                    <div class="cardName" style="color: white;">F8</div>
+                </div>
+                <div class="lord-icon05">
+                    <i class='bx bx-store iconBx05' style="color: white;"></i>
+                </div>
+            </a>
+        </li>
     <?php endif ?>
 
     <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vLancamento')) : ?>
@@ -139,6 +150,96 @@
                 </table>
             </div>
         </div>
+
+        <!-- Widget de Notificações de Vendas a Prazo -->
+        <?php if (isset($notificacoes_vendas) && !empty($notificacoes_vendas)): ?>
+        <div class="widget-box" style="margin-top: 20px;">
+            <div class="widget-title">
+                <span class="icon">
+                    <i class="fas fa-bell" style="color: #f44336;"></i>
+                </span>
+                <h5>Notificações de Vendas a Prazo 
+                    <?php if ($count_notificacoes_nao_lidas > 0): ?>
+                    <span class="badge badge-danger"><?php echo $count_notificacoes_nao_lidas; ?></span>
+                    <?php endif; ?>
+                </h5>
+            </div>
+            <div class="widget-content nopadding">
+                <ul class="recent-posts" style="max-height: 300px; overflow-y: auto;">
+                    <?php foreach ($notificacoes_vendas as $notificacao): ?>
+                    <li class="<?php echo $notificacao->lida == 0 ? 'unread' : ''; ?>" style="padding: 10px; border-bottom: 1px solid #eee;">
+                        <div class="user-thumb" style="float: left; width: 40px; height: 40px; background: <?php 
+                            echo $notificacao->prioridade == 'urgente' ? '#f44336' : ($notificacao->prioridade == 'alta' ? '#FF9800' : ($notificacao->prioridade == 'media' ? '#2196F3' : '#4CAF50'));
+                        ?>; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin-right: 10px;">
+                            <i class="fas fa-<?php 
+                                echo $notificacao->tipo == 'atraso' ? 'exclamation-triangle' : ($notificacao->tipo == 'vencendo_proximo' ? 'clock' : ($notificacao->tipo == 'pagamento_recebido' ? 'check-circle' : 'info-circle'));
+                            ?>"></i>
+                        </div>
+                        <div class="article-post" style="margin-left: 50px;">
+                            <span class="user-info">
+                                <strong><?php echo $notificacao->titulo; ?></strong>
+                                <span style="float: right; font-size: 11px; color: #999;">
+                                    <?php echo date('d/m/Y H:i', strtotime($notificacao->created_at)); ?>
+                                </span>
+                            </span>
+                            <p style="margin: 5px 0; font-size: 12px;">
+                                <?php echo $notificacao->mensagem; ?>
+                            </p>
+                            <a href="<?php echo base_url(); ?>index.php/vendas_prazo/visualizar/<?php echo $notificacao->idVendas; ?>" 
+                               class="btn btn-mini btn-info" style="font-size: 11px;">
+                                <i class="fas fa-eye"></i> Ver Venda
+                            </a>
+                            <?php if ($notificacao->lida == 0): ?>
+                            <button class="btn btn-mini btn-success marcar-lida" 
+                                    data-notificacao-id="<?php echo $notificacao->idNotificacao; ?>" 
+                                    style="font-size: 11px;">
+                                <i class="fas fa-check"></i> Marcar como Lida
+                            </button>
+                            <?php endif; ?>
+                        </div>
+                    </li>
+                    <?php endforeach; ?>
+                </ul>
+                <div style="padding: 10px; text-align: center; border-top: 1px solid #eee;">
+                    <a href="<?php echo base_url(); ?>index.php/vendas_prazo" class="btn btn-primary">
+                        <i class="fas fa-list"></i> Ver Todas as Vendas a Prazo
+                    </a>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <!-- Estatísticas de Vendas a Prazo -->
+        <?php if (isset($estatisticas_vendas_prazo) && $estatisticas_vendas_prazo->total_vendas > 0): ?>
+        <div class="widget-box" style="margin-top: 20px;">
+            <div class="widget-title">
+                <span class="icon">
+                    <i class="fas fa-chart-line"></i>
+                </span>
+                <h5>Vendas a Prazo - Este Mês</h5>
+            </div>
+            <div class="widget-content">
+                <div class="span12" style="margin-left: 0;">
+                    <div class="span3" style="text-align: center; padding: 15px;">
+                        <h3 style="margin: 0; color: #2196F3;"><?php echo number_format($estatisticas_vendas_prazo->total_vendas, 0, ',', '.'); ?></h3>
+                        <p style="margin: 5px 0 0 0; color: #666;">Total de Vendas</p>
+                    </div>
+                    <div class="span3" style="text-align: center; padding: 15px;">
+                        <h3 style="margin: 0; color: #FF9800;">R$ <?php echo number_format($estatisticas_vendas_prazo->valor_pendente, 2, ',', '.'); ?></h3>
+                        <p style="margin: 5px 0 0 0; color: #666;">Valor Pendente</p>
+                    </div>
+                    <div class="span3" style="text-align: center; padding: 15px;">
+                        <h3 style="margin: 0; color: #f44336;"><?php echo number_format($estatisticas_vendas_prazo->vendas_atrasadas, 0, ',', '.'); ?></h3>
+                        <p style="margin: 5px 0 0 0; color: #666;">Vendas Atrasadas</p>
+                    </div>
+                    <div class="span3" style="text-align: center; padding: 15px;">
+                        <h3 style="margin: 0; color: #4CAF50;">R$ <?php echo number_format($estatisticas_vendas_prazo->valor_pago, 2, ',', '.'); ?></h3>
+                        <p style="margin: 5px 0 0 0; color: #666;">Valor Pago</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <!-- New widget right -->
         <div class="new-statisc">
@@ -1200,6 +1301,55 @@ if ($this->permission->checkPermission($this->session->userdata('permissao'), 'd
 </div>
 
 <script src="<?php echo base_url() ?>assets/js/jquery.validate.js"></script>
+<script src="<?php echo base_url() ?>assets/js/sweetalert2.all.min.js"></script>
+<!-- Script para Notificações de Vendas a Prazo -->
+<script type="text/javascript">
+    $(document).ready(function() {
+        // Marcar notificação como lida
+        $('.marcar-lida').click(function() {
+            var notificacaoId = $(this).data('notificacao-id');
+            var btn = $(this);
+            
+            $.ajax({
+                url: '<?php echo base_url(); ?>index.php/vendas_prazo/marcarNotificacaoLida/' + notificacaoId,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.result) {
+                        btn.closest('li').removeClass('unread');
+                        btn.remove();
+                        // Atualizar contador se existir
+                        var count = parseInt($('.badge-danger').text()) || 0;
+                        if (count > 1) {
+                            $('.badge-danger').text(count - 1);
+                        } else {
+                            $('.badge-danger').remove();
+                        }
+                    }
+                }
+            });
+        });
+
+        // Atualizar notificações a cada 30 segundos
+        setInterval(function() {
+            $.ajax({
+                url: '<?php echo base_url(); ?>index.php/vendas_prazo/countNotificacoesNaoLidas',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.result && response.count > 0) {
+                        // Atualizar badge se existir
+                        if ($('.badge-danger').length > 0) {
+                            $('.badge-danger').text(response.count);
+                        } else {
+                            $('h5:contains("Notificações de Vendas a Prazo")').append(' <span class="badge badge-danger">' + response.count + '</span>');
+                        }
+                    }
+                }
+            });
+        }, 30000); // 30 segundos
+    });
+</script>
 <!-- Modal Estoque-->
 <script type="text/javascript">
     $(document).ready(function() {

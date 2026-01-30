@@ -92,6 +92,8 @@ if (! function_exists('printSafeHtml')) {
 
         if ($purifier === null) {
             $config = HTMLPurifier_Config::createDefault();
+            // Desabilitar cache para evitar problemas de permissão
+            $config->set('Cache.DefinitionImpl', null);
             $purifier = new HTMLPurifier($config);
         }
 
