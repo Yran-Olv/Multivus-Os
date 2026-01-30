@@ -597,8 +597,130 @@ endforeach;
             </div>
         <?php endif; ?>
     </div>
+    <!-- Botão e Modal WhatsApp -->
+    <?php 
+    $this->load->helper('whatsapp');
+    $idOs = $result->idOs;
+    // A configuração está disponível via $this->data['configuration'] do MY_Controller
+    $CI = &get_instance();
+    $configWhatsapp = isset($CI->data['configuration']) ? $CI->data['configuration'] : [];
+    $enabled = isset($configWhatsapp['whatsapp_enabled']) && $configWhatsapp['whatsapp_enabled'] == '1';
+    $hasToken = isset($configWhatsapp['whatsapp_api_token']) && !empty($configWhatsapp['whatsapp_api_token']);
+    $urlWhatsapp = base_url() . 'index.php/whatsapp_os/enviar/' . $idOs;
+    ?>
+    
+    <div id="whatsapp-controls" style="position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; gap: 10px;">
+        <?php if ($enabled && $hasToken) { ?>
+            <button type="button" class="btn btn-success" onclick="abrirModalWhatsApp()" style="padding: 10px 20px; font-size: 14px; background: #25D366; border: none; color: white; border-radius: 5px; cursor: pointer;">
+                <i class="bx bxl-whatsapp"></i> Enviar via WhatsApp
+            </button>
+        <?php } else { ?>
+            <button type="button" class="btn btn-success" onclick="alert('Configure o WhatsApp em Mapos > Configurações > API')" style="padding: 10px 20px; font-size: 14px; opacity: 0.7; background: #25D366; border: none; color: white; border-radius: 5px; cursor: pointer;">
+                <i class="bx bxl-whatsapp"></i> Enviar via WhatsApp
+            </button>
+        <?php } ?>
+        <button type="button" class="btn btn-primary" onclick="window.print()" style="padding: 10px 20px; font-size: 14px; background: #007bff; border: none; color: white; border-radius: 5px; cursor: pointer;">
+            <i class="bx bx-printer"></i> Imprimir
+        </button>
+    </div>
+
+    <!-- Modal WhatsApp -->
+    <div id="modal-whatsapp" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5);">
+        <div style="background-color: #fefefe; margin: 15% auto; padding: 30px; border: none; width: 450px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+                <h3 style="margin: 0; color: #25D366;">
+                    <i class="bx bxl-whatsapp"></i> Enviar via WhatsApp
+                </h3>
+                <span onclick="fecharModalWhatsApp()" style="color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 1;">&times;</span>
+            </div>
+            <p style="margin-bottom: 20px; color: #666;">
+                Deseja enviar a <strong>Ordem de Serviço #<?= str_pad($idOs, 4, 0, STR_PAD_LEFT) ?></strong> para o cliente <strong><?= $result->nomeCliente ?></strong> via WhatsApp?
+            </p>
+            <div style="margin-top: 25px; display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" onclick="fecharModalWhatsApp()" style="padding: 10px 20px; background: #6c757d; border: none; color: white; border-radius: 5px; cursor: pointer;">Cancelar</button>
+                <button type="button" onclick="enviarWhatsApp()" id="btn-enviar-whatsapp" style="padding: 10px 20px; background: #25D366; border: none; color: white; border-radius: 5px; cursor: pointer;">
+                    <i class="bx bxl-whatsapp"></i> Enviar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Ocultar controles na impressão */
+        @media print {
+            #whatsapp-controls, #modal-whatsapp {
+                display: none !important;
+            }
+        }
+        
+        /* Estilos para os botões */
+        #whatsapp-controls button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        #whatsapp-controls button:active {
+            transform: translateY(0);
+        }
+    </style>
+
+    <script src="<?= base_url() ?>assets/js/sweetalert2.all.min.js"></script>
     <script type="text/javascript">
+        function abrirModalWhatsApp() {
+            document.getElementById('modal-whatsapp').style.display = 'block';
+        }
+        
+        function fecharModalWhatsApp() {
+            document.getElementById('modal-whatsapp').style.display = 'none';
+        }
+        
+        function enviarWhatsApp() {
+            var btn = document.getElementById('btn-enviar-whatsapp');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bx bx-loader bx-spin"></i> Enviando...';
+            
+            var url = '<?= $urlWhatsapp ?>';
+            
+            // Redirecionar para a URL de envio
+            Swal.fire({
+                icon: 'info',
+                title: 'Enviando...',
+                text: 'A ordem de serviço está sendo enviada via WhatsApp.',
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Redirecionar após um breve delay
+            setTimeout(function() {
+                window.location.href = url;
+            }, 500);
+        }
+        
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            var modal = document.getElementById('modal-whatsapp');
+            if (event.target == modal) {
+                fecharModalWhatsApp();
+            }
+        }
+        
+        // Fechar modal com ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                fecharModalWhatsApp();
+            }
+        });
+        
+        // Auto-print após 2 segundos (para dar tempo de ver os botões)
+        setTimeout(function() {
+            // Não fazer print automático se o modal estiver aberto
+            if (document.getElementById('modal-whatsapp').style.display !== 'block') {
         window.print();
+            }
+        }, 2000);
     </script>
 </body>
 </html>

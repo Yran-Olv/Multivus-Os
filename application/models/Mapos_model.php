@@ -453,9 +453,22 @@ class Mapos_model extends CI_Model
     {
         try {
             foreach ($data as $key => $valor) {
-                $this->db->set('valor', $valor);
+                // Verificar se a configuração já existe
                 $this->db->where('config', $key);
-                $this->db->update('configuracoes');
+                $exists = $this->db->get('configuracoes')->row();
+                
+                if ($exists) {
+                    // Atualizar se existir
+                    $this->db->set('valor', $valor);
+                    $this->db->where('config', $key);
+                    $this->db->update('configuracoes');
+                } else {
+                    // Inserir se não existir
+                    $this->db->insert('configuracoes', [
+                        'config' => $key,
+                        'valor' => $valor
+                    ]);
+                }
             }
         } catch (Exception $e) {
             return false;

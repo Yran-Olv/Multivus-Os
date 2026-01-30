@@ -26,6 +26,17 @@
                             <?php } ?>
                         </div>
                     </div>
+                    <?php 
+                    // Incluir botão WhatsApp via helper (arquivo separado) - ao lado do botão Imprimir
+                    $this->load->helper('whatsapp');
+                    // A configuração está disponível via $configuration (passada pelo controller através do MY_Controller)
+                    // Se não estiver disponível, busca diretamente do CI
+                    if (!isset($configuration)) {
+                        $CI = &get_instance();
+                        $configuration = isset($CI->data['configuration']) ? $CI->data['configuration'] : [];
+                    }
+                    echo whatsapp_render_button($result->idOs, $configuration);
+                    ?>
 
                     <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vOs')) {
                         $this->load->model('os_model');

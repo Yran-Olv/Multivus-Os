@@ -579,6 +579,14 @@ class Mapos extends MY_Controller
                 'os_status_list' => json_encode($this->input->post('os_status_list')),
                 'control_2vias' => $this->input->post('control_2vias'),
             ];
+            
+            // Carregar helper de WhatsApp para salvar configurações
+            $this->load->helper('whatsapp');
+            $whatsappData = whatsapp_save_config($this->input->post());
+            // Sempre mesclar os dados do WhatsApp (agora sempre retorna array)
+            if ($whatsappData && is_array($whatsappData)) {
+                $data = array_merge($data, $whatsappData);
+            }
             if ($this->mapos_model->saveConfiguracao($data) == true) {
                 $this->session->set_flashdata('success', 'Configurações do sistema atualizadas com sucesso!');
                 redirect(site_url('mapos/configurar'));

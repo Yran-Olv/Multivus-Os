@@ -441,6 +441,14 @@
                                 <span class="help-inline">Gerar um novo token JWT.</span>
                             </div>
                         </div>
+                        
+                        <?php 
+                        // Incluir configurações do WhatsApp via view parcial (arquivo separado)
+                        if (file_exists(APPPATH . 'views/mapos/partials/whatsapp_config.php')) {
+                            $this->load->view('mapos/partials/whatsapp_config', ['configuration' => $configuration]);
+                        }
+                        ?>
+                        
                         <div class="form-actions">
                             <div class="span8">
                                 <div class="span9">

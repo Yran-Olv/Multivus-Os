@@ -41,6 +41,11 @@
                             <?php } ?>
                         </div>
                     </div>
+                    <?php 
+                    // Incluir botão WhatsApp via helper (arquivo separado) - ao lado do botão Imprimir
+                    $this->load->helper('whatsapp');
+                    echo whatsapp_render_button($result->idOs, $configuration);
+                    ?>
                     <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'eOs')) {
                         $this->load->model('os_model');
                         $zapnumber = preg_replace("/[^0-9]/", "", $result->celular_cliente);
