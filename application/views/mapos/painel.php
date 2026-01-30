@@ -1179,7 +1179,7 @@
                                         <?= $p->idProdutos ?>
                                     </td>
                                     <td class="cli1">
-                                        <?= $p->descricao ?>
+                                        <?= getNomeProduto($p) ?>
                                     </td>
                                     <td>R$
                                         <?= $p->precoVenda ?>

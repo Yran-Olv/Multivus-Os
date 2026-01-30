@@ -403,14 +403,26 @@
                          data-produto-id="<?php echo $produto->idProdutos; ?>"
                          data-produto-preco="<?php echo $produto->precoVenda; ?>"
                          data-produto-estoque="<?php echo $produto->estoque; ?>">
-                        <?php if (!empty($produto->url_image_thumb) && file_exists(FCPATH . $produto->url_image_thumb)): ?>
-                        <img src="<?php echo base_url() . $produto->url_image_thumb; ?>" alt="<?php echo $produto->descricao; ?>">
+                        <?php 
+                        $nomeProduto = getNomeProduto($produto);
+                        $imagemProduto = null;
+                        if (!empty($produto->imagem) && file_exists(FCPATH . 'assets/produtos/' . $produto->imagem)) {
+                            $imagemProduto = base_url('assets/produtos/' . $produto->imagem);
+                        } elseif (!empty($produto->url_image_thumb) && file_exists(FCPATH . $produto->url_image_thumb)) {
+                            $imagemProduto = base_url() . $produto->url_image_thumb;
+                        }
+                        ?>
+                        <?php if ($imagemProduto): ?>
+                        <img src="<?php echo $imagemProduto; ?>" alt="<?php echo htmlspecialchars($nomeProduto); ?>" onerror="this.parentElement.querySelector('.img-placeholder').style.display='flex'; this.style.display='none';">
+                        <div class="img-placeholder" style="width: 100%; height: 120px; background: #ecf0f1; display: none; align-items: center; justify-content: center; border-radius: 5px;">
+                            <i class="fas fa-box" style="font-size: 48px; color: #bdc3c7;"></i>
+                        </div>
                         <?php else: ?>
                         <div style="width: 100%; height: 120px; background: #ecf0f1; display: flex; align-items: center; justify-content: center; border-radius: 5px;">
                             <i class="fas fa-box" style="font-size: 48px; color: #bdc3c7;"></i>
                         </div>
                         <?php endif; ?>
-                        <div class="nome"><?php echo $produto->descricao; ?></div>
+                        <div class="nome" title="<?php echo htmlspecialchars($nomeProduto); ?>"><?php echo htmlspecialchars($nomeProduto); ?></div>
                         <div class="preco">R$ <?php echo number_format($produto->precoVenda, 2, ',', '.'); ?></div>
                         <div class="estoque">
                             <?php if ($produto->estoque <= 0): ?>
@@ -656,8 +668,15 @@
                     ? `<span class="badge-estoque badge-estoque-baixo">Estoque: ${produto.estoque}</span>`
                     : `<span class="badge-estoque badge-estoque-ok">Estoque: ${produto.estoque}</span>`;
                 
-                const imagem = (produto.url_image_thumb && produto.url_image_thumb.trim() !== '')
-                    ? `<img src="<?php echo base_url(); ?>${produto.url_image_thumb}" alt="${produto.descricao}">`
+                const nomeProduto = produto.nome || produto.descricao || '';
+                const imagemProduto = (produto.imagem && produto.imagem.trim() !== '')
+                    ? `<?php echo base_url(); ?>assets/produtos/${produto.imagem}`
+                    : (produto.url_image_thumb && produto.url_image_thumb.trim() !== '')
+                    ? `<?php echo base_url(); ?>${produto.url_image_thumb}`
+                    : null;
+                
+                const imagem = imagemProduto
+                    ? `<img src="${imagemProduto}" alt="${nomeProduto}" onerror="this.parentElement.querySelector('.img-placeholder').style.display='flex'; this.style.display='none';"><div class="img-placeholder" style="width: 100%; height: 120px; background: #ecf0f1; display: none; align-items: center; justify-content: center; border-radius: 5px;"><i class="fas fa-box" style="font-size: 48px; color: #bdc3c7;"></i></div>`
                     : `<div style="width: 100%; height: 120px; background: #ecf0f1; display: flex; align-items: center; justify-content: center; border-radius: 5px;"><i class="fas fa-box" style="font-size: 48px; color: #bdc3c7;"></i></div>`;
 
                 html += `
@@ -666,7 +685,7 @@
                          data-produto-preco="${produto.precoVenda}"
                          data-produto-estoque="${produto.estoque}">
                         ${imagem}
-                        <div class="nome">${produto.descricao}</div>
+                        <div class="nome" title="${nomeProduto}">${nomeProduto}</div>
                         <div class="preco">R$ ${parseFloat(produto.precoVenda).toFixed(2).replace('.', ',')}</div>
                         <div class="estoque">${estoqueBadge}</div>
                     </div>

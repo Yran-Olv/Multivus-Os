@@ -29,6 +29,11 @@ class Pdv_model extends CI_Model
         if (!empty($termo)) {
             $this->db->group_start();
             $this->db->like('produtos.descricao', $termo);
+            // Verificar se campo nome existe antes de usar
+            $fields = $this->db->list_fields('produtos');
+            if (in_array('nome', $fields)) {
+                $this->db->or_like('produtos.nome', $termo);
+            }
             $this->db->or_like('produtos.codDeBarra', $termo);
             $this->db->group_end();
         }
@@ -363,7 +368,10 @@ class Pdv_model extends CI_Model
             $data = date('Y-m-d');
         }
         
-        $this->db->select('produtos.descricao, SUM(itens_de_vendas.quantidade) as quantidade_vendida, SUM(itens_de_vendas.subTotal) as total_vendido');
+        // Verificar se campo nome existe
+        $fields = $this->db->list_fields('produtos');
+        $nomeField = in_array('nome', $fields) ? 'COALESCE(produtos.nome, produtos.descricao) as descricao' : 'produtos.descricao';
+        $this->db->select($nomeField . ', SUM(itens_de_vendas.quantidade) as quantidade_vendida, SUM(itens_de_vendas.subTotal) as total_vendido');
         $this->db->from('itens_de_vendas');
         $this->db->join('vendas', 'vendas.idVendas = itens_de_vendas.vendas_id');
         $this->db->join('produtos', 'produtos.idProdutos = itens_de_vendas.produtos_id');

@@ -181,7 +181,7 @@ foreach ($produtos as $p) {
     $preco = $p->preco ?: $p->precoVenda;
     $total = $total + $p->subTotal;
     echo '<tr>';
-    echo '<td>' . $p->descricao . '</td>';
+    echo '<td>' . getNomeProduto($p) . '</td>';
     echo '<td><div align="center">' . $p->quantidade . '</td>';
     echo '<td><div align="center">R$: ' . $preco . '</td>';
     echo '<td><div align="center"><a href="" idAcao="' . $p->idItens . '" prodAcao="' . $p->idProdutos . '" quantAcao="' . $p->quantidade . '" title="Excluir Produto" class="btn-nwe4"><i class="bx bx-trash-alt"></i></a></td>';

@@ -90,12 +90,12 @@ class Vendas_prazo_model extends CI_Model
         }
 
         try {
-            $this->db->select('parcelas_venda.*, formas_pagamento.nome as forma_pagamento_nome, usuarios.nome as usuario_nome');
-            $this->db->from('parcelas_venda');
-            $this->db->join('formas_pagamento', 'formas_pagamento.idFormaPagamento = parcelas_venda.formas_pagamento_id', 'left');
-            $this->db->join('usuarios', 'usuarios.idUsuarios = parcelas_venda.usuarios_id', 'left');
-            $this->db->where('vendas_id', $vendaId);
-            $this->db->order_by('numero_parcela', 'ASC');
+        $this->db->select('parcelas_venda.*, formas_pagamento.nome as forma_pagamento_nome, usuarios.nome as usuario_nome');
+        $this->db->from('parcelas_venda');
+        $this->db->join('formas_pagamento', 'formas_pagamento.idFormaPagamento = parcelas_venda.formas_pagamento_id', 'left');
+        $this->db->join('usuarios', 'usuarios.idUsuarios = parcelas_venda.usuarios_id', 'left');
+        $this->db->where('vendas_id', $vendaId);
+        $this->db->order_by('numero_parcela', 'ASC');
 
             $query = $this->db->get();
             
@@ -125,12 +125,12 @@ class Vendas_prazo_model extends CI_Model
         }
 
         try {
-            $this->db->select('parcelas_venda.*, vendas.*, clientes.nomeCliente, clientes.telefone, clientes.email');
-            $this->db->from('parcelas_venda');
-            $this->db->join('vendas', 'vendas.idVendas = parcelas_venda.vendas_id');
-            $this->db->join('clientes', 'clientes.idClientes = vendas.clientes_id');
-            $this->db->where('parcelas_venda.idParcela', $parcelaId);
-            $this->db->limit(1);
+        $this->db->select('parcelas_venda.*, vendas.*, clientes.nomeCliente, clientes.telefone, clientes.email');
+        $this->db->from('parcelas_venda');
+        $this->db->join('vendas', 'vendas.idVendas = parcelas_venda.vendas_id');
+        $this->db->join('clientes', 'clientes.idClientes = vendas.clientes_id');
+        $this->db->where('parcelas_venda.idParcela', $parcelaId);
+        $this->db->limit(1);
 
             $query = $this->db->get();
             
@@ -160,9 +160,9 @@ class Vendas_prazo_model extends CI_Model
         }
 
         try {
-            if ($dataPagamento === null) {
-                $dataPagamento = date('Y-m-d');
-            }
+        if ($dataPagamento === null) {
+            $dataPagamento = date('Y-m-d');
+        }
 
             $query = $this->db->get_where('parcelas_venda', ['idParcela' => $parcelaId]);
             
@@ -174,10 +174,10 @@ class Vendas_prazo_model extends CI_Model
             }
             
             $parcela = $query ? $query->row() : null;
-            
-            if (!$parcela) {
-                return false;
-            }
+        
+        if (!$parcela) {
+            return false;
+        }
 
         $this->db->trans_start();
 
@@ -218,18 +218,18 @@ class Vendas_prazo_model extends CI_Model
         // Atualizar valores da venda
         $this->atualizarValoresVenda($parcela->vendas_id);
 
-            // Se parcela foi paga, criar notificação
-            if ($status === 'paga') {
-                $this->criarNotificacao($parcela->vendas_id, $parcelaId, 'pagamento_recebido', 
-                    'Parcela Paga', 
-                    "Parcela #{$parcela->numero_parcela} da venda #{$parcela->vendas_id} foi paga no valor de R$ " . number_format($valorPago, 2, ',', '.'),
-                    'baixa'
-                );
-            }
+        // Se parcela foi paga, criar notificação
+        if ($status === 'paga') {
+            $this->criarNotificacao($parcela->vendas_id, $parcelaId, 'pagamento_recebido', 
+                'Parcela Paga', 
+                "Parcela #{$parcela->numero_parcela} da venda #{$parcela->vendas_id} foi paga no valor de R$ " . number_format($valorPago, 2, ',', '.'),
+                'baixa'
+            );
+        }
 
-            $this->db->trans_complete();
+        $this->db->trans_complete();
 
-            return $this->db->trans_status() !== false;
+        return $this->db->trans_status() !== false;
         } catch (Exception $e) {
             log_message('error', 'Exceção em registrarPagamento: ' . $e->getMessage());
             if ($this->db->trans_status() !== false) {
@@ -251,17 +251,17 @@ class Vendas_prazo_model extends CI_Model
         }
 
         try {
-            $parcelas = $this->getParcelas($vendaId);
-            
-            $valorPagoTotal = 0;
-            $valorPendente = 0;
-            
-            foreach ($parcelas as $parcela) {
-                $valorPagoTotal += $parcela->valor_pago;
-                if ($parcela->status !== 'paga') {
-                    $valorPendente += ($parcela->valor_total - $parcela->valor_pago);
-                }
+        $parcelas = $this->getParcelas($vendaId);
+        
+        $valorPagoTotal = 0;
+        $valorPendente = 0;
+        
+        foreach ($parcelas as $parcela) {
+            $valorPagoTotal += $parcela->valor_pago;
+            if ($parcela->status !== 'paga') {
+                $valorPendente += ($parcela->valor_total - $parcela->valor_pago);
             }
+        }
 
             $updateData = [];
             
@@ -275,7 +275,7 @@ class Vendas_prazo_model extends CI_Model
             }
             
             if (!empty($updateData)) {
-                $this->db->where('idVendas', $vendaId);
+        $this->db->where('idVendas', $vendaId);
                 $this->db->update('vendas', $updateData);
                 
                 // Verificar se houve erro na query
@@ -301,11 +301,11 @@ class Vendas_prazo_model extends CI_Model
         }
 
         try {
-            $hoje = date('Y-m-d');
-            
-            // Buscar parcelas pendentes com vencimento passado
-            $this->db->where('status', 'pendente');
-            $this->db->where('data_vencimento <', $hoje);
+        $hoje = date('Y-m-d');
+        
+        // Buscar parcelas pendentes com vencimento passado
+        $this->db->where('status', 'pendente');
+        $this->db->where('data_vencimento <', $hoje);
             $query = $this->db->get('parcelas_venda');
             
             // Verificar se houve erro na query
@@ -317,49 +317,49 @@ class Vendas_prazo_model extends CI_Model
             
             $parcelas = $query ? $query->result() : [];
 
-            foreach ($parcelas as $parcela) {
-                $diasAtraso = (strtotime($hoje) - strtotime($parcela->data_vencimento)) / 86400;
-                
-                // Buscar configurações da venda para calcular multa e juros
+        foreach ($parcelas as $parcela) {
+            $diasAtraso = (strtotime($hoje) - strtotime($parcela->data_vencimento)) / 86400;
+            
+            // Buscar configurações da venda para calcular multa e juros
                 $vendaQuery = $this->db->get_where('vendas', ['idVendas' => $parcela->vendas_id]);
                 $venda = $vendaQuery ? $vendaQuery->row() : null;
-                
-                $multa = 0;
-                $juros = 0;
-                
+            
+            $multa = 0;
+            $juros = 0;
+            
                 if ($venda && isset($venda->taxa_multa) && $venda->taxa_multa > 0) {
-                    $multa = $parcela->valor_parcela * ($venda->taxa_multa / 100);
-                }
-                
+                $multa = $parcela->valor_parcela * ($venda->taxa_multa / 100);
+            }
+            
                 if ($venda && isset($venda->taxa_juros) && $venda->taxa_juros > 0) {
-                    $mesesAtraso = $diasAtraso / 30;
-                    $juros = $parcela->valor_parcela * ($venda->taxa_juros / 100) * $mesesAtraso;
-                }
-
-                $valorTotal = $parcela->valor_parcela + $multa + $juros - $parcela->desconto;
-
-                // Atualizar parcela
-                $this->db->where('idParcela', $parcela->idParcela);
-                $this->db->update('parcelas_venda', [
-                    'status' => 'atrasada',
-                    'dias_atraso' => $diasAtraso,
-                    'multa' => $multa,
-                    'juros' => $juros,
-                    'valor_total' => $valorTotal
-                ]);
-
-                // Criar notificação de atraso
-                $this->criarNotificacao(
-                    $parcela->vendas_id,
-                    $parcela->idParcela,
-                    'atraso',
-                    'Parcela em Atraso',
-                    "Parcela #{$parcela->numero_parcela} da venda #{$parcela->vendas_id} está em atraso há {$diasAtraso} dia(s). Valor: R$ " . number_format($valorTotal, 2, ',', '.'),
-                    $diasAtraso > 30 ? 'urgente' : ($diasAtraso > 15 ? 'alta' : 'media')
-                );
+                $mesesAtraso = $diasAtraso / 30;
+                $juros = $parcela->valor_parcela * ($venda->taxa_juros / 100) * $mesesAtraso;
             }
 
-            return count($parcelas);
+            $valorTotal = $parcela->valor_parcela + $multa + $juros - $parcela->desconto;
+
+            // Atualizar parcela
+            $this->db->where('idParcela', $parcela->idParcela);
+            $this->db->update('parcelas_venda', [
+                'status' => 'atrasada',
+                'dias_atraso' => $diasAtraso,
+                'multa' => $multa,
+                'juros' => $juros,
+                'valor_total' => $valorTotal
+            ]);
+
+            // Criar notificação de atraso
+            $this->criarNotificacao(
+                $parcela->vendas_id,
+                $parcela->idParcela,
+                'atraso',
+                'Parcela em Atraso',
+                "Parcela #{$parcela->numero_parcela} da venda #{$parcela->vendas_id} está em atraso há {$diasAtraso} dia(s). Valor: R$ " . number_format($valorTotal, 2, ',', '.'),
+                $diasAtraso > 30 ? 'urgente' : ($diasAtraso > 15 ? 'alta' : 'media')
+            );
+        }
+
+        return count($parcelas);
         } catch (Exception $e) {
             log_message('error', 'Exceção em atualizarParcelasAtrasadas: ' . $e->getMessage());
             return 0;
@@ -378,16 +378,16 @@ class Vendas_prazo_model extends CI_Model
         }
 
         try {
-            $data = [
-                'vendas_id' => $vendaId,
-                'parcelas_venda_id' => $parcelaId,
-                'tipo' => $tipo,
-                'titulo' => $titulo,
-                'mensagem' => $mensagem,
-                'prioridade' => $prioridade,
-                'lida' => 0,
-                'usuarios_id' => $usuarioId
-            ];
+        $data = [
+            'vendas_id' => $vendaId,
+            'parcelas_venda_id' => $parcelaId,
+            'tipo' => $tipo,
+            'titulo' => $titulo,
+            'mensagem' => $mensagem,
+            'prioridade' => $prioridade,
+            'lida' => 0,
+            'usuarios_id' => $usuarioId
+        ];
 
             $result = $this->db->insert('notificacoes_venda', $data);
             
@@ -417,29 +417,29 @@ class Vendas_prazo_model extends CI_Model
         }
 
         try {
-            $this->db->select('notificacoes_venda.*, vendas.idVendas, clientes.nomeCliente, parcelas_venda.numero_parcela');
-            $this->db->from('notificacoes_venda');
+        $this->db->select('notificacoes_venda.*, vendas.idVendas, clientes.nomeCliente, parcelas_venda.numero_parcela');
+        $this->db->from('notificacoes_venda');
             $this->db->join('vendas', 'vendas.idVendas = notificacoes_venda.vendas_id', 'inner');
             $this->db->join('clientes', 'clientes.idClientes = vendas.clientes_id', 'inner');
-            $this->db->join('parcelas_venda', 'parcelas_venda.idParcela = notificacoes_venda.parcelas_venda_id', 'left');
-            
-            if ($usuarioId !== null) {
-                $this->db->where('(notificacoes_venda.usuarios_id IS NULL OR notificacoes_venda.usuarios_id = ' . $usuarioId . ')');
-            }
-            
-            if ($lidas !== null) {
-                $this->db->where('notificacoes_venda.lida', $lidas);
-            }
-            
-            if ($tipo !== null) {
-                $this->db->where('notificacoes_venda.tipo', $tipo);
-            }
-            
-            $this->db->order_by('notificacoes_venda.created_at', 'DESC');
-            
-            if ($limit !== null) {
-                $this->db->limit($limit);
-            }
+        $this->db->join('parcelas_venda', 'parcelas_venda.idParcela = notificacoes_venda.parcelas_venda_id', 'left');
+        
+        if ($usuarioId !== null) {
+            $this->db->where('(notificacoes_venda.usuarios_id IS NULL OR notificacoes_venda.usuarios_id = ' . $usuarioId . ')');
+        }
+        
+        if ($lidas !== null) {
+            $this->db->where('notificacoes_venda.lida', $lidas);
+        }
+        
+        if ($tipo !== null) {
+            $this->db->where('notificacoes_venda.tipo', $tipo);
+        }
+        
+        $this->db->order_by('notificacoes_venda.created_at', 'DESC');
+        
+        if ($limit !== null) {
+            $this->db->limit($limit);
+        }
 
             $query = $this->db->get();
             
@@ -469,16 +469,16 @@ class Vendas_prazo_model extends CI_Model
         }
 
         try {
-            $data = [
-                'lida' => 1,
-                'data_leitura' => date('Y-m-d H:i:s')
-            ];
+        $data = [
+            'lida' => 1,
+            'data_leitura' => date('Y-m-d H:i:s')
+        ];
 
-            $this->db->where('idNotificacao', $notificacaoId);
-            if ($usuarioId !== null) {
-                $this->db->where('(usuarios_id IS NULL OR usuarios_id = ' . $usuarioId . ')');
-            }
-            
+        $this->db->where('idNotificacao', $notificacaoId);
+        if ($usuarioId !== null) {
+            $this->db->where('(usuarios_id IS NULL OR usuarios_id = ' . $usuarioId . ')');
+        }
+        
             $result = $this->db->update('notificacoes_venda', $data);
             
             // Verificar se houve erro na query
@@ -507,11 +507,11 @@ class Vendas_prazo_model extends CI_Model
         }
 
         try {
-            $this->db->where('lida', 0);
-            if ($usuarioId !== null) {
-                $this->db->where('(usuarios_id IS NULL OR usuarios_id = ' . $usuarioId . ')');
-            }
-            
+        $this->db->where('lida', 0);
+        if ($usuarioId !== null) {
+            $this->db->where('(usuarios_id IS NULL OR usuarios_id = ' . $usuarioId . ')');
+        }
+        
             $count = $this->db->count_all_results('notificacoes_venda');
             
             // Verificar se houve erro na query
@@ -546,65 +546,65 @@ class Vendas_prazo_model extends CI_Model
         }
 
         try {
-            $this->db->select('vendas.*, clientes.nomeCliente, clientes.telefone, clientes.email, usuarios.nome as vendedor_nome');
-            $this->db->from('vendas');
-            $this->db->join('clientes', 'clientes.idClientes = vendas.clientes_id');
-            $this->db->join('usuarios', 'usuarios.idUsuarios = vendas.usuarios_id', 'left');
-            $this->db->where('vendas.tipo_venda', 'aprazo');
+        $this->db->select('vendas.*, clientes.nomeCliente, clientes.telefone, clientes.email, usuarios.nome as vendedor_nome');
+        $this->db->from('vendas');
+        $this->db->join('clientes', 'clientes.idClientes = vendas.clientes_id');
+        $this->db->join('usuarios', 'usuarios.idUsuarios = vendas.usuarios_id', 'left');
+        $this->db->where('vendas.tipo_venda', 'aprazo');
 
-            // Filtros
-            if (isset($filtros['status_parcela'])) {
-                if ($filtros['status_parcela'] === 'atrasadas') {
+        // Filtros
+        if (isset($filtros['status_parcela'])) {
+            if ($filtros['status_parcela'] === 'atrasadas') {
                     if ($this->db->field_exists('valor_pendente', 'vendas')) {
-                        $this->db->where('vendas.valor_pendente >', 0);
+                $this->db->where('vendas.valor_pendente >', 0);
                     }
                     if ($this->db->table_exists('parcelas_venda')) {
-                        $this->db->where('EXISTS (SELECT 1 FROM parcelas_venda WHERE parcelas_venda.vendas_id = vendas.idVendas AND parcelas_venda.status = "atrasada")');
+                $this->db->where('EXISTS (SELECT 1 FROM parcelas_venda WHERE parcelas_venda.vendas_id = vendas.idVendas AND parcelas_venda.status = "atrasada")');
                     }
-                } elseif ($filtros['status_parcela'] === 'pendentes') {
+            } elseif ($filtros['status_parcela'] === 'pendentes') {
                     if ($this->db->field_exists('valor_pendente', 'vendas')) {
-                        $this->db->where('vendas.valor_pendente >', 0);
+                $this->db->where('vendas.valor_pendente >', 0);
                     }
-                } elseif ($filtros['status_parcela'] === 'pagas') {
+            } elseif ($filtros['status_parcela'] === 'pagas') {
                     if ($this->db->field_exists('valor_pendente', 'vendas')) {
-                        $this->db->where('vendas.valor_pendente', 0);
+                $this->db->where('vendas.valor_pendente', 0);
                     }
-                }
             }
+        }
 
-            if (isset($filtros['cliente'])) {
-                $this->db->like('clientes.nomeCliente', $filtros['cliente']);
-            }
+        if (isset($filtros['cliente'])) {
+            $this->db->like('clientes.nomeCliente', $filtros['cliente']);
+        }
 
-            if (isset($filtros['data_inicio'])) {
-                $this->db->where('vendas.dataVenda >=', $filtros['data_inicio']);
-            }
+        if (isset($filtros['data_inicio'])) {
+            $this->db->where('vendas.dataVenda >=', $filtros['data_inicio']);
+        }
 
-            if (isset($filtros['data_fim'])) {
-                $this->db->where('vendas.dataVenda <=', $filtros['data_fim']);
-            }
+        if (isset($filtros['data_fim'])) {
+            $this->db->where('vendas.dataVenda <=', $filtros['data_fim']);
+        }
 
-            if (isset($filtros['vencimento_inicio'])) {
+        if (isset($filtros['vencimento_inicio'])) {
                 if ($this->db->field_exists('data_primeiro_vencimento', 'vendas')) {
-                    $this->db->where('vendas.data_primeiro_vencimento >=', $filtros['vencimento_inicio']);
+            $this->db->where('vendas.data_primeiro_vencimento >=', $filtros['vencimento_inicio']);
                 }
-            }
+        }
 
-            if (isset($filtros['vencimento_fim'])) {
+        if (isset($filtros['vencimento_fim'])) {
                 if ($this->db->field_exists('data_primeiro_vencimento', 'vendas')) {
-                    $this->db->where('vendas.data_primeiro_vencimento <=', $filtros['vencimento_fim']);
+            $this->db->where('vendas.data_primeiro_vencimento <=', $filtros['vencimento_fim']);
                 }
-            }
+        }
 
-            if (isset($filtros['valor_minimo'])) {
-                $this->db->where('vendas.valorTotal >=', $filtros['valor_minimo']);
-            }
+        if (isset($filtros['valor_minimo'])) {
+            $this->db->where('vendas.valorTotal >=', $filtros['valor_minimo']);
+        }
 
-            if (isset($filtros['valor_maximo'])) {
-                $this->db->where('vendas.valorTotal <=', $filtros['valor_maximo']);
-            }
+        if (isset($filtros['valor_maximo'])) {
+            $this->db->where('vendas.valorTotal <=', $filtros['valor_maximo']);
+        }
 
-            $this->db->order_by('vendas.dataVenda', 'DESC');
+        $this->db->order_by('vendas.dataVenda', 'DESC');
 
             $query = $this->db->get();
             
@@ -640,12 +640,12 @@ class Vendas_prazo_model extends CI_Model
         }
 
         try {
-            if ($dataInicio === null) {
-                $dataInicio = date('Y-m-01'); // Primeiro dia do mês
-            }
-            if ($dataFim === null) {
-                $dataFim = date('Y-m-t'); // Último dia do mês
-            }
+        if ($dataInicio === null) {
+            $dataInicio = date('Y-m-01'); // Primeiro dia do mês
+        }
+        if ($dataFim === null) {
+            $dataFim = date('Y-m-t'); // Último dia do mês
+        }
 
             // Verificar se as colunas existem antes de usar
             $colunasExistentes = [];
@@ -674,10 +674,10 @@ class Vendas_prazo_model extends CI_Model
             }
 
             $this->db->select($select);
-            $this->db->from('vendas');
-            $this->db->where('tipo_venda', 'aprazo');
-            $this->db->where('dataVenda >=', $dataInicio);
-            $this->db->where('dataVenda <=', $dataFim);
+        $this->db->from('vendas');
+        $this->db->where('tipo_venda', 'aprazo');
+        $this->db->where('dataVenda >=', $dataInicio);
+        $this->db->where('dataVenda <=', $dataFim);
 
             $query = $this->db->get();
             
@@ -722,12 +722,12 @@ class Vendas_prazo_model extends CI_Model
         }
 
         try {
-            $this->db->select('historico_pagamentos.*, formas_pagamento.nome as forma_pagamento_nome, usuarios.nome as usuario_nome');
-            $this->db->from('historico_pagamentos');
-            $this->db->join('formas_pagamento', 'formas_pagamento.idFormaPagamento = historico_pagamentos.formas_pagamento_id', 'left');
-            $this->db->join('usuarios', 'usuarios.idUsuarios = historico_pagamentos.usuarios_id', 'left');
-            $this->db->where('historico_pagamentos.parcelas_venda_id', $parcelaId);
-            $this->db->order_by('historico_pagamentos.data_pagamento', 'DESC');
+        $this->db->select('historico_pagamentos.*, formas_pagamento.nome as forma_pagamento_nome, usuarios.nome as usuario_nome');
+        $this->db->from('historico_pagamentos');
+        $this->db->join('formas_pagamento', 'formas_pagamento.idFormaPagamento = historico_pagamentos.formas_pagamento_id', 'left');
+        $this->db->join('usuarios', 'usuarios.idUsuarios = historico_pagamentos.usuarios_id', 'left');
+        $this->db->where('historico_pagamentos.parcelas_venda_id', $parcelaId);
+        $this->db->order_by('historico_pagamentos.data_pagamento', 'DESC');
 
             $query = $this->db->get();
             

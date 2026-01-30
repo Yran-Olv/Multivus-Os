@@ -128,7 +128,7 @@
                         <?php foreach ($produtos_mais_vendidos as $produto): ?>
                         <tr>
                             <td><?php echo $posicao++; ?></td>
-                            <td><?php echo $produto->descricao; ?></td>
+                            <td><?php echo getNomeProduto($produto); ?></td>
                             <td><?php echo number_format($produto->quantidade_vendida, 0, ',', '.'); ?></td>
                             <td>R$ <?php echo number_format($produto->total_vendido, 2, ',', '.'); ?></td>
                         </tr>

@@ -41,7 +41,7 @@
                                 <?php
                                     foreach ($produtos as $p) {
                                         echo '<tr>';
-                                        echo '<td>' . $p->descricao . '</td>';
+                                        echo '<td>' . getNomeProduto($p) . '</td>';
                                         echo '<td align="center">' . $p->unidade . '</td>';
                                         echo '<td align="center">R$: ' . $p->precoCompra . '</td>';
                                         echo '<td align="center">R$: ' . $p->precoVenda . '</td>';

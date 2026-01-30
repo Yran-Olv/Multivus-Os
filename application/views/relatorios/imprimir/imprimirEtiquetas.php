@@ -28,7 +28,7 @@
                                         ?>
 							<div class="detalheProdutoEtiqueta">
 								<div class="descricaoProdutoEtiqueta">
-									<?php $string = strtoupper($p->descricao); ?>
+									<?php $string = strtoupper(getNomeProduto($p)); ?>
 									<div>
 										<strong>
 											<?php print(limitarTexto($string, $limite = 23)); ?>
@@ -58,7 +58,7 @@
                                     ?>
 							<div class="detalheProdutoEtiqueta">
 								<div class="descricaoProdutoEtiqueta">
-									<?php $string = strtoupper($p->descricao); ?>
+									<?php $string = strtoupper(getNomeProduto($p)); ?>
 									<div>
 										<strong>
 											<?php print(limitarTexto($string, $limite = 23)); ?>
@@ -92,7 +92,7 @@
                                         ?>
 							<div class="detalheProdutoEtiquetaEan13">
 								<div class="descricaoProdutoEtiqueta">
-									<?php $string = strtoupper($p->descricao); ?>
+									<?php $string = strtoupper(getNomeProduto($p)); ?>
 									<div>
 										<strong>
 											<?php print(limitarTexto($string, $limite = 23)); ?>
@@ -124,7 +124,7 @@
                                     ?>
 							<div class="detalheProdutoEtiquetaEan13">
 								<div class="descricaoProdutoEtiqueta">
-									<?php $string = strtoupper($p->descricao); ?>
+									<?php $string = strtoupper(getNomeProduto($p)); ?>
 									<div>
 										<strong>
 											<?php print(limitarTexto($string, $limite = 23)); ?>

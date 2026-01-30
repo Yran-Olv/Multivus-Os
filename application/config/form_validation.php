@@ -77,9 +77,14 @@ $config = [
     ],
     'produtos' => [
         [
+            'field' => 'nome',
+            'label' => 'Nome do Produto',
+            'rules' => 'required|trim|max_length[100]',
+        ],
+        [
             'field' => 'descricao',
-            'label' => '',
-            'rules' => 'required|trim',
+            'label' => 'Descrição',
+            'rules' => 'trim|max_length[80]',
         ],
         [
             'field' => 'unidade',

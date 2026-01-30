@@ -100,7 +100,7 @@
                                                 foreach ($produtos as $p) {
                                                     $totalProdutos = $totalProdutos + $p->subTotal;
                                                     echo '<tr>';
-                                                    echo '<td>' . $p->descricao . '</td>';
+                                                    echo '<td>' . getNomeProduto($p) . '</td>';
                                                     echo '<td>' . $p->quantidade . '</td>';
                                                     echo '<td>R$ ' . ($p->preco ?: $p->precoVenda) . '</td>';
                                                     echo '<td>R$ ' . number_format($p->subTotal, 2, ',', '.') . '</td>';

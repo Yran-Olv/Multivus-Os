@@ -45,7 +45,7 @@
                                         echo '<td>' . $r->idClientes . '</td>';
                                         echo '<td>' . $r->nomeCliente . '</td>';
                                         echo '<td>' . $r->idProdutos . '</td>';
-                                        echo '<td>' . $r->descricao . '</td>';
+                                        echo '<td>' . getNomeProduto($r) . '</td>';
                                         echo '<td>' . $r->quantidade . '</td>';
                                         echo '<td>' . $r->idRelacionado . '</td>';
                                         echo '<td>' . date('d/m/Y', strtotime($r->dataOcorrencia)) . '</td>';

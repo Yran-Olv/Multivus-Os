@@ -18,12 +18,74 @@
                                 <?php echo $result->codDeBarra ?>
                             </td>
                         </tr>
+                        <?php if (!empty($result->imagem)): ?>
+                        <tr>
+                            <td style="text-align: center; width: 30%"><strong>Imagem</strong></td>
+                            <td>
+                                <img src="<?php echo base_url('assets/produtos/' . $result->imagem); ?>" alt="<?php echo htmlspecialchars(getNomeProduto($result)); ?>" style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 5px; padding: 5px;" />
+                            </td>
+                        </tr>
+                        <?php endif; ?>
+                        <tr>
+                            <td style="text-align: right; width: 30%"><strong>Nome do Produto</strong></td>
+                            <td>
+                                <?php echo htmlspecialchars(getNomeProduto($result)); ?>
+                            </td>
+                        </tr>
+                        <?php 
+                        // Verificar se há especificações técnicas
+                        $temEspecificacoes = !empty($result->marca) || !empty($result->modelo) || 
+                                            !empty($result->processador) || !empty($result->memoria_ram) || 
+                                            !empty($result->armazenamento) || !empty($result->tela) || 
+                                            !empty($result->sistema_operacional) || !empty($result->cor);
+                        ?>
+                        <?php if ($temEspecificacoes): ?>
+                        <tr>
+                            <td style="text-align: right; width: 30%"><strong>Especificações Técnicas</strong></td>
+                            <td>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                    <?php if (!empty($result->marca)): ?>
+                                    <div><strong>Marca:</strong> <?php echo htmlspecialchars($result->marca); ?></div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($result->modelo)): ?>
+                                    <div><strong>Modelo:</strong> <?php echo htmlspecialchars($result->modelo); ?></div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($result->processador)): ?>
+                                    <div><strong>Processador:</strong> <?php echo htmlspecialchars($result->processador); ?></div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($result->memoria_ram)): ?>
+                                    <div><strong>Memória RAM:</strong> <?php echo htmlspecialchars($result->memoria_ram); ?></div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($result->armazenamento)): ?>
+                                    <div><strong>Armazenamento:</strong> <?php echo htmlspecialchars($result->armazenamento); ?></div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($result->tela)): ?>
+                                    <div><strong>Tela:</strong> <?php echo htmlspecialchars($result->tela); ?></div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($result->sistema_operacional)): ?>
+                                    <div><strong>Sistema Operacional:</strong> <?php echo htmlspecialchars($result->sistema_operacional); ?></div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($result->cor)): ?>
+                                    <div><strong>Cor:</strong> <?php echo htmlspecialchars($result->cor); ?></div>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endif; ?>
                         <tr>
                             <td style="text-align: right; width: 30%"><strong>Descrição</strong></td>
                             <td>
-                                <?php echo $result->descricao ?>
+                                <?php echo htmlspecialchars($result->descricao); ?>
                             </td>
                         </tr>
+                        <?php if (!empty($result->descricao_completa)): ?>
+                        <tr>
+                            <td style="text-align: right; width: 30%"><strong>Descrição Completa</strong></td>
+                            <td>
+                                <?php echo nl2br(htmlspecialchars($result->descricao_completa)); ?>
+                            </td>
+                        </tr>
+                        <?php endif; ?>
                         <tr>
                             <td style="text-align: right"><strong>Unidade</strong></td>
                             <td>

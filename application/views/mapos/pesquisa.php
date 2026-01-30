@@ -39,7 +39,7 @@
         foreach ($produtos as $r) {
             echo '<tr>';
             echo '<td>' . $r->idProdutos . '</td>';
-            echo '<td>' . $r->descricao . '</td>';
+            echo '<td>' . getNomeProduto($r) . '</td>';
             echo '<td>' . $r->precoVenda . '</td>';
             echo '<td>' . $r->estoque . '</td>';
             echo '<td>';

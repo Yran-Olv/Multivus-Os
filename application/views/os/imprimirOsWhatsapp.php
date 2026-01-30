@@ -380,7 +380,7 @@ $osNum = str_pad($result->idOs, 4, '0', STR_PAD_LEFT);
                         $unit = $p->preco ?: $p->precoVenda;
                         ?>
                         <tr>
-                            <td><?= $p->descricao ?></td>
+                            <td><?= getNomeProduto($p) ?></td>
                             <td class="center"><?= $p->quantidade ?></td>
                             <td class="num">R$ <?= number_format($unit, 2, ',', '.') ?></td>
                             <td class="num">R$ <?= number_format($p->subTotal, 2, ',', '.') ?></td>

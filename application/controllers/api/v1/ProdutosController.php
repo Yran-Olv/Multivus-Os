@@ -26,7 +26,10 @@ class ProdutosController extends REST_Controller
 
         if (! $id) {
             $search = trim($this->get('search', true));
-            $where = $search ? "codDeBarra LIKE '%{$search}%' OR descricao LIKE '%{$search}%'" : '';
+            // Verificar se campo nome existe
+            $fields = $this->db->list_fields('produtos');
+            $nomeCondition = in_array('nome', $fields) ? " OR nome LIKE '%{$search}%'" : '';
+            $where = $search ? "codDeBarra LIKE '%{$search}%' OR descricao LIKE '%{$search}%'{$nomeCondition}" : '';
 
             $perPage = $this->get('perPage', true) ?: 20;
             $page = $this->get('page', true) ?: 0;
@@ -83,9 +86,22 @@ class ProdutosController extends REST_Controller
         $precoCompra = str_replace(',', '', $precoCompra);
         $precoVenda = $this->post('precoVenda', true);
         $precoVenda = str_replace(',', '', $precoVenda);
+        $nome = $this->post('nome', true);
+        $descricao = $this->post('descricao', true);
+        // Se descrição estiver vazia, usar o nome (limitado a 80 caracteres)
+        if (empty($descricao) && !empty($nome)) {
+            $descricao = mb_substr($nome, 0, 80);
+        }
+        // Se nome estiver vazio, usar a descrição
+        if (empty($nome) && !empty($descricao)) {
+            $nome = $descricao;
+        }
+        
         $data = [
             'codDeBarra' => $this->post('codDeBarra', true),
-            'descricao' => $this->post('descricao', true),
+            'nome' => $nome,
+            'descricao' => $descricao,
+            'descricao_completa' => $this->post('descricao_completa', true),
             'unidade' => $this->post('unidade', true),
             'precoCompra' => $precoCompra,
             'precoVenda' => $precoVenda,
@@ -142,9 +158,23 @@ class ProdutosController extends REST_Controller
         $precoCompra = str_replace(',', '', $precoCompra);
         $precoVenda = $this->put('precoVenda', true);
         $precoVenda = str_replace(',', '', $precoVenda);
+        
+        $nome = $this->put('nome', true);
+        $descricao = $this->put('descricao', true);
+        // Se descrição estiver vazia, usar o nome (limitado a 80 caracteres)
+        if (empty($descricao) && !empty($nome)) {
+            $descricao = mb_substr($nome, 0, 80);
+        }
+        // Se nome estiver vazio, usar a descrição
+        if (empty($nome) && !empty($descricao)) {
+            $nome = $descricao;
+        }
+        
         $data = [
             'codDeBarra' => $this->put('codDeBarra', true) ?: 0,
-            'descricao' => $this->put('descricao', true),
+            'nome' => $nome,
+            'descricao' => $descricao,
+            'descricao_completa' => $this->put('descricao_completa', true),
             'unidade' => $this->put('unidade', true),
             'precoCompra' => $precoCompra,
             'precoVenda' => $precoVenda,

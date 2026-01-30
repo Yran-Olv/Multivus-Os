@@ -57,16 +57,69 @@ class Produtos extends MY_Controller
         $this->load->library('form_validation');
         $this->data['custom_error'] = '';
 
+        // Remover campo de imagem dos dados POST antes da validação (arquivos não devem ser validados como texto)
+        $post_data = $this->input->post();
+        unset($post_data['imagem']);
+        $this->form_validation->set_data($post_data);
+        
         if ($this->form_validation->run('produtos') == false) {
             $this->data['custom_error'] = (validation_errors() ? '<div class="form_error">' . validation_errors() . '</div>' : false);
         } else {
+            // Upload de imagem (opcional)
+            $imagem = $this->uploadImagemProduto();
+            
+            // Se houver erro no upload (retornou false), não prosseguir
+            if ($imagem === false) {
+                $this->data['custom_error'] = '<div class="form_error">' . $this->session->flashdata('error') . '</div>';
+            } else {
+            
             $precoCompra = $this->input->post('precoCompra');
             $precoCompra = str_replace(',', '', $precoCompra);
             $precoVenda = $this->input->post('precoVenda');
             $precoVenda = str_replace(',', '', $precoVenda);
+            $nome = $this->input->post('nome');
+            $descricao = $this->input->post('descricao');
+            
+            // Se descrição estiver vazia, gerar automaticamente com nome e especificações
+            if (empty($descricao)) {
+                $especificacoes = [];
+                if ($this->input->post('marca')) $especificacoes[] = $this->input->post('marca');
+                if ($this->input->post('modelo')) $especificacoes[] = $this->input->post('modelo');
+                if ($this->input->post('processador')) $especificacoes[] = $this->input->post('processador');
+                if ($this->input->post('memoria_ram')) $especificacoes[] = $this->input->post('memoria_ram') . ' RAM';
+                if ($this->input->post('armazenamento')) $especificacoes[] = $this->input->post('armazenamento');
+                
+                $descricao = $nome;
+                if (!empty($especificacoes)) {
+                    $descricao .= ' ' . implode(' ', $especificacoes);
+                }
+                // Limitar a 80 caracteres
+                $descricao = mb_substr($descricao, 0, 80);
+            }
+            
+            // Se nome estiver vazio, usar a descrição
+            if (empty($nome) && !empty($descricao)) {
+                $nome = mb_substr($descricao, 0, 100);
+            }
+            
+            // Função auxiliar para converter strings vazias em NULL
+            $nullIfEmpty = function($value) {
+                return ($value === '' || $value === null) ? null : trim($value);
+            };
+            
             $data = [
                 'codDeBarra' => set_value('codDeBarra'),
-                'descricao' => set_value('descricao'),
+                'nome' => $nome,
+                'descricao' => $descricao,
+                'descricao_completa' => $nullIfEmpty($this->input->post('descricao_completa')),
+                'marca' => $nullIfEmpty($this->input->post('marca')),
+                'modelo' => $nullIfEmpty($this->input->post('modelo')),
+                'processador' => $nullIfEmpty($this->input->post('processador')),
+                'memoria_ram' => $nullIfEmpty($this->input->post('memoria_ram')),
+                'armazenamento' => $nullIfEmpty($this->input->post('armazenamento')),
+                'tela' => $nullIfEmpty($this->input->post('tela')),
+                'sistema_operacional' => $nullIfEmpty($this->input->post('sistema_operacional')),
+                'cor' => $nullIfEmpty($this->input->post('cor')),
                 'unidade' => set_value('unidade'),
                 'precoCompra' => $precoCompra,
                 'precoVenda' => $precoVenda,
@@ -75,13 +128,18 @@ class Produtos extends MY_Controller
                 'saida' => set_value('saida'),
                 'entrada' => set_value('entrada'),
             ];
+            
+                if ($imagem) {
+                    $data['imagem'] = $imagem;
+                }
 
-            if ($this->produtos_model->add('produtos', $data) == true) {
-                $this->session->set_flashdata('success', 'Produto adicionado com sucesso!');
-                log_info('Adicionou um produto');
-                redirect(site_url('produtos/adicionar/'));
-            } else {
-                $this->data['custom_error'] = '<div class="form_error"><p>An Error Occured.</p></div>';
+                if ($this->produtos_model->add('produtos', $data) == true) {
+                    $this->session->set_flashdata('success', 'Produto adicionado com sucesso!');
+                    log_info('Adicionou um produto');
+                    redirect(site_url('produtos/adicionar/'));
+                } else {
+                    $this->data['custom_error'] = '<div class="form_error"><p>An Error Occured.</p></div>';
+                }
             }
         }
         $this->data['view'] = 'produtos/adicionarProduto';
@@ -103,31 +161,97 @@ class Produtos extends MY_Controller
         $this->load->library('form_validation');
         $this->data['custom_error'] = '';
 
+        // Remover campo de imagem dos dados POST antes da validação (arquivos não devem ser validados como texto)
+        $post_data = $this->input->post();
+        unset($post_data['imagem']);
+        $this->form_validation->set_data($post_data);
+        
         if ($this->form_validation->run('produtos') == false) {
             $this->data['custom_error'] = (validation_errors() ? '<div class="form_error">' . validation_errors() . '</div>' : false);
         } else {
-            $precoCompra = $this->input->post('precoCompra');
-            $precoCompra = str_replace(',', '', $precoCompra);
-            $precoVenda = $this->input->post('precoVenda');
-            $precoVenda = str_replace(',', '', $precoVenda);
-            $data = [
-                'codDeBarra' => set_value('codDeBarra'),
-                'descricao' => $this->input->post('descricao'),
-                'unidade' => $this->input->post('unidade'),
-                'precoCompra' => $precoCompra,
-                'precoVenda' => $precoVenda,
-                'estoque' => $this->input->post('estoque'),
-                'estoqueMinimo' => $this->input->post('estoqueMinimo'),
-                'saida' => set_value('saida'),
-                'entrada' => set_value('entrada'),
-            ];
-
-            if ($this->produtos_model->edit('produtos', $data, 'idProdutos', $this->input->post('idProdutos')) == true) {
-                $this->session->set_flashdata('success', 'Produto editado com sucesso!');
-                log_info('Alterou um produto. ID: ' . $this->input->post('idProdutos'));
-                redirect(site_url('produtos/editar/') . $this->input->post('idProdutos'));
+            // Upload de imagem (se houver nova imagem) - opcional
+            $imagem = $this->uploadImagemProduto();
+            
+            // Se houver erro no upload (retornou false), não prosseguir
+            if ($imagem === false) {
+                $this->data['custom_error'] = '<div class="form_error">' . $this->session->flashdata('error') . '</div>';
             } else {
-                $this->data['custom_error'] = '<div class="form_error"><p>An Error Occured</p></div>';
+                $precoCompra = $this->input->post('precoCompra');
+                $precoCompra = str_replace(',', '', $precoCompra);
+                $precoVenda = $this->input->post('precoVenda');
+                $precoVenda = str_replace(',', '', $precoVenda);
+                $nome = $this->input->post('nome');
+                $descricao = $this->input->post('descricao');
+                
+                // Se descrição estiver vazia, gerar automaticamente com nome e especificações
+                if (empty($descricao)) {
+                    $especificacoes = [];
+                    if ($this->input->post('marca')) $especificacoes[] = $this->input->post('marca');
+                    if ($this->input->post('modelo')) $especificacoes[] = $this->input->post('modelo');
+                    if ($this->input->post('processador')) $especificacoes[] = $this->input->post('processador');
+                    if ($this->input->post('memoria_ram')) $especificacoes[] = $this->input->post('memoria_ram') . ' RAM';
+                    if ($this->input->post('armazenamento')) $especificacoes[] = $this->input->post('armazenamento');
+                    
+                    $descricao = $nome;
+                    if (!empty($especificacoes)) {
+                        $descricao .= ' ' . implode(' ', $especificacoes);
+                    }
+                    // Limitar a 80 caracteres
+                    $descricao = mb_substr($descricao, 0, 80);
+                }
+                
+                // Se nome estiver vazio, usar a descrição
+                if (empty($nome) && !empty($descricao)) {
+                    $nome = mb_substr($descricao, 0, 100);
+                }
+                
+                // Função auxiliar para converter strings vazias em NULL
+                $nullIfEmpty = function($value) {
+                    return ($value === '' || $value === null) ? null : trim($value);
+                };
+                
+                $data = [
+                    'codDeBarra' => set_value('codDeBarra'),
+                    'nome' => $nome,
+                    'descricao' => $descricao,
+                    'descricao_completa' => $nullIfEmpty($this->input->post('descricao_completa')),
+                    'marca' => $nullIfEmpty($this->input->post('marca')),
+                    'modelo' => $nullIfEmpty($this->input->post('modelo')),
+                    'processador' => $nullIfEmpty($this->input->post('processador')),
+                    'memoria_ram' => $nullIfEmpty($this->input->post('memoria_ram')),
+                    'armazenamento' => $nullIfEmpty($this->input->post('armazenamento')),
+                    'tela' => $nullIfEmpty($this->input->post('tela')),
+                    'sistema_operacional' => $nullIfEmpty($this->input->post('sistema_operacional')),
+                    'cor' => $nullIfEmpty($this->input->post('cor')),
+                    'unidade' => $this->input->post('unidade'),
+                    'precoCompra' => $precoCompra,
+                    'precoVenda' => $precoVenda,
+                    'estoque' => $this->input->post('estoque'),
+                    'estoqueMinimo' => $this->input->post('estoqueMinimo'),
+                    'saida' => set_value('saida'),
+                    'entrada' => set_value('entrada'),
+                ];
+                
+                // Se uma nova imagem foi enviada, atualizar
+                if ($imagem) {
+                    // Remover imagem antiga se existir
+                    $produtoAtual = $this->produtos_model->getById($this->input->post('idProdutos'));
+                    if ($produtoAtual && $produtoAtual->imagem) {
+                        $imagemAntiga = FCPATH . 'assets/produtos/' . $produtoAtual->imagem;
+                        if (file_exists($imagemAntiga)) {
+                            unlink($imagemAntiga);
+                        }
+                    }
+                    $data['imagem'] = $imagem;
+                }
+
+                if ($this->produtos_model->edit('produtos', $data, 'idProdutos', $this->input->post('idProdutos')) == true) {
+                    $this->session->set_flashdata('success', 'Produto editado com sucesso!');
+                    log_info('Alterou um produto. ID: ' . $this->input->post('idProdutos'));
+                    redirect(site_url('produtos/editar/') . $this->input->post('idProdutos'));
+                } else {
+                    $this->data['custom_error'] = '<div class="form_error"><p>An Error Occured</p></div>';
+                }
             }
         }
 
@@ -175,6 +299,15 @@ class Produtos extends MY_Controller
             redirect(base_url() . 'index.php/produtos/gerenciar/');
         }
 
+        // Remover imagem do produto se existir
+        $produto = $this->produtos_model->getById($id);
+        if ($produto && $produto->imagem) {
+            $imagemPath = FCPATH . 'assets/produtos/' . $produto->imagem;
+            if (file_exists($imagemPath)) {
+                unlink($imagemPath);
+            }
+        }
+        
         $this->produtos_model->delete('produtos_os', 'produtos_id', $id);
         $this->produtos_model->delete('itens_de_vendas', 'produtos_id', $id);
         $this->produtos_model->delete('produtos', 'idProdutos', $id);
@@ -183,6 +316,43 @@ class Produtos extends MY_Controller
 
         $this->session->set_flashdata('success', 'Produto excluido com sucesso!');
         redirect(site_url('produtos/gerenciar/'));
+    }
+
+    /**
+     * Upload de imagem do produto
+     */
+    private function uploadImagemProduto()
+    {
+        if (!isset($_FILES['imagem']) || $_FILES['imagem']['error'] != UPLOAD_ERR_OK) {
+            return null;
+        }
+
+        $image_upload_folder = FCPATH . 'assets/produtos/';
+        
+        if (!file_exists($image_upload_folder)) {
+            mkdir($image_upload_folder, 0755, true);
+        }
+
+        $this->load->library('upload');
+        
+        $config = [
+            'upload_path' => $image_upload_folder,
+            'allowed_types' => 'jpg|jpeg|png|gif|webp',
+            'max_size' => 40960, // 40MB
+            'remove_space' => true,
+            'encrypt_name' => true,
+        ];
+
+        $this->upload->initialize($config);
+
+        if (!$this->upload->do_upload('imagem')) {
+            $error = $this->upload->display_errors();
+            log_message('error', 'Erro no upload de imagem: ' . $error);
+            return null;
+        }
+
+        $file_info = $this->upload->data();
+        return $file_info['file_name'];
     }
 
     public function atualizar_estoque()

@@ -24,6 +24,39 @@
         /* Move the check mark back when checked */
         text-indent: 0;
     }
+    
+    /* Estilos para especificações técnicas */
+    .especificacoes-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 10px;
+    }
+    
+    .especificacoes-grid > div {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .especificacoes-grid label {
+        font-weight: normal;
+        font-size: 12px;
+        margin-bottom: 5px;
+        color: #555;
+    }
+    
+    .especificacoes-grid input {
+        width: 100%;
+        padding: 6px 10px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+    }
+    
+    @media (max-width: 768px) {
+        .especificacoes-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 <div class="row-fluid" style="margin-top:0">
     <div class="span12">
@@ -36,20 +69,92 @@
             </div>
             <div class="widget-content nopadding tab-content">
                 <?php echo $custom_error; ?>
-                <form action="<?php echo current_url(); ?>" id="formProduto" method="post" class="form-horizontal">
+                <form action="<?php echo current_url(); ?>" id="formProduto" method="post" class="form-horizontal" enctype="multipart/form-data" novalidate>
                     <div class="control-group">
                         <?php echo form_hidden('idProdutos', $result->idProdutos) ?>
+                        <label for="imagem" class="control-label">Imagem do Produto</label>
+                        <div class="controls">
+                            <?php if (!empty($result->imagem)): ?>
+                                <div style="margin-bottom: 10px;">
+                                    <img src="<?php echo base_url('assets/produtos/' . $result->imagem); ?>" alt="Imagem atual" style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 5px; padding: 5px;" />
+                                    <br><small style="color: #666;">Imagem atual</small>
+                                </div>
+                            <?php endif; ?>
+                            <input id="imagem" type="file" name="imagem" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" />
+                            <small style="color: #666;">Formatos aceitos: JPG, PNG, GIF, WEBP (máx. 40MB). Deixe em branco para manter a imagem atual.</small>
+                            <div id="preview-imagem" style="margin-top: 10px; display: none;">
+                                <img id="img-preview" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 5px; padding: 5px;" />
+                                <br><small style="color: #666;">Nova imagem (preview)</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="nome" class="control-label">Nome do Produto<span class="required">*</span></label>
+                        <div class="controls">
+                            <input id="nome" type="text" name="nome" value="<?php echo isset($result->nome) ? $result->nome : $result->descricao; ?>" placeholder="Ex: Notebook Sony Vaio" maxlength="100" />
+                            <small style="color: #666;">Nome curto para exibição em cards do PDV, listagens e relatórios (máx. 100 caracteres)</small>
+                        </div>
+                    </div>
+                    <div class="control-group">
                         <label for="codDeBarra" class="control-label">Código de Barra<span class=""></span></label>
                         <div class="controls">
                             <input id="codDeBarra" type="text" name="codDeBarra" value="<?php echo $result->codDeBarra; ?>" />
                         </div>
                     </div>
+                    
+                    <!-- Especificações Técnicas -->
                     <div class="control-group">
-                        <label for="descricao" class="control-label">Descrição<span class="required">*</span></label>
+                        <label class="control-label"><strong>Especificações Técnicas</strong></label>
                         <div class="controls">
-                            <input id="descricao" type="text" name="descricao" value="<?php echo $result->descricao; ?>" />
+                            <small style="color: #666; display: block; margin-bottom: 10px;">Preencha os campos abaixo conforme o tipo de produto (computadores, celulares, periféricos, etc.)</small>
+                            
+                            <div class="especificacoes-grid">
+                                <div>
+                                    <label for="marca">Marca</label>
+                                    <input id="marca" type="text" name="marca" value="<?php echo isset($result->marca) ? $result->marca : ''; ?>" placeholder="Ex: Sony, Samsung, Dell" maxlength="100" />
+                                </div>
+                                <div>
+                                    <label for="modelo">Modelo</label>
+                                    <input id="modelo" type="text" name="modelo" value="<?php echo isset($result->modelo) ? $result->modelo : ''; ?>" placeholder="Ex: Vaio, Galaxy S23" maxlength="100" />
+                                </div>
+                                <div>
+                                    <label for="processador">Processador</label>
+                                    <input id="processador" type="text" name="processador" value="<?php echo isset($result->processador) ? $result->processador : ''; ?>" placeholder="Ex: Intel i5, Snapdragon 888" maxlength="100" />
+                                </div>
+                                <div>
+                                    <label for="memoria_ram">Memória RAM</label>
+                                    <input id="memoria_ram" type="text" name="memoria_ram" value="<?php echo isset($result->memoria_ram) ? $result->memoria_ram : ''; ?>" placeholder="Ex: 8GB, 16GB DDR4" maxlength="50" />
+                                </div>
+                                <div>
+                                    <label for="armazenamento">Armazenamento</label>
+                                    <input id="armazenamento" type="text" name="armazenamento" value="<?php echo isset($result->armazenamento) ? $result->armazenamento : ''; ?>" placeholder="Ex: 256GB SSD, 1TB HDD" maxlength="50" />
+                                </div>
+                                <div>
+                                    <label for="tela">Tela</label>
+                                    <input id="tela" type="text" name="tela" value="<?php echo isset($result->tela) ? $result->tela : ''; ?>" placeholder="Ex: 15.6&quot;, 6.1&quot; Full HD" maxlength="50" />
+                                </div>
+                                <div>
+                                    <label for="sistema_operacional">Sistema Operacional</label>
+                                    <input id="sistema_operacional" type="text" name="sistema_operacional" value="<?php echo isset($result->sistema_operacional) ? $result->sistema_operacional : ''; ?>" placeholder="Ex: Windows 11, Android 13" maxlength="50" />
+                                </div>
+                                <div>
+                                    <label for="cor">Cor</label>
+                                    <input id="cor" type="text" name="cor" value="<?php echo isset($result->cor) ? $result->cor : ''; ?>" placeholder="Ex: Preto, Prata, Azul" maxlength="50" />
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    
+                    <div class="control-group">
+                        <label for="descricao_completa" class="control-label">Descrição Completa</label>
+                        <div class="controls">
+                            <textarea id="descricao_completa" name="descricao_completa" rows="4" style="width: 100%;"><?php echo isset($result->descricao_completa) ? $result->descricao_completa : ''; ?></textarea>
+                            <small style="color: #666;">Descrição detalhada adicional, observações, características especiais, etc. (opcional)</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Campo descricao oculto (para compatibilidade) -->
+                    <input type="hidden" id="descricao" name="descricao" value="<?php echo $result->descricao; ?>" />
 
                     <div class="control-group">
                         <label class="control-label">Tipo de Movimento</label>
@@ -196,6 +301,57 @@
         }
     });
 
+    // Preview de imagem
+    $('#imagem').on('change', function(e) {
+        var file = e.target.files[0];
+        if (file) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                $('#img-preview').attr('src', e.target.result);
+                $('#preview-imagem').show();
+            }
+            reader.readAsDataURL(file);
+        } else {
+            $('#preview-imagem').hide();
+        }
+    });
+
+    // Gerar descrição automaticamente com base no nome e especificações
+    function gerarDescricao() {
+        var nome = $('#nome').val();
+        var marca = $('#marca').val();
+        var modelo = $('#modelo').val();
+        var processador = $('#processador').val();
+        var memoriaRam = $('#memoria_ram').val();
+        var armazenamento = $('#armazenamento').val();
+        
+        var descricao = nome;
+        var especificacoes = [];
+        
+        if (marca) especificacoes.push(marca);
+        if (modelo) especificacoes.push(modelo);
+        if (processador) especificacoes.push(processador);
+        if (memoriaRam) especificacoes.push(memoriaRam + ' RAM');
+        if (armazenamento) especificacoes.push(armazenamento);
+        
+        if (especificacoes.length > 0) {
+            descricao += ' ' + especificacoes.join(' ');
+        }
+        
+        // Limitar a 80 caracteres para compatibilidade
+        if (descricao.length > 80) {
+            descricao = descricao.substring(0, 77) + '...';
+        }
+        
+        $('#descricao').val(descricao);
+    }
+    
+    // Atualizar descrição quando campos mudarem
+    $('#nome, #marca, #modelo, #processador, #memoria_ram, #armazenamento').on('blur change', gerarDescricao);
+    
+    // Gerar descrição inicial
+    gerarDescricao();
+
     $(document).ready(function() {
         $(".money").maskMoney();
         $.getJSON('<?php echo base_url() ?>assets/json/tabela_medidas.json', function(data) {
@@ -205,8 +361,9 @@
             }
         });
         $('#formProduto').validate({
+            ignore: ":hidden, [type='file']", // Ignorar campos ocultos e arquivos
             rules: {
-                descricao: {
+                nome: {
                     required: true
                 },
                 unidade: {
@@ -223,7 +380,7 @@
                 }
             },
             messages: {
-                descricao: {
+                nome: {
                     required: 'Campo Requerido.'
                 },
                 unidade: {

@@ -100,3 +100,22 @@ if (! function_exists('printSafeHtml')) {
         return $purifier->purify($html);
     }
 }
+
+if (! function_exists('getNomeProduto')) {
+    /**
+     * Retorna o nome do produto (usa campo 'nome' se existir, senão usa 'descricao')
+     * 
+     * @param object|array $produto Objeto ou array do produto
+     * @return string Nome do produto
+     */
+    function getNomeProduto($produto)
+    {
+        if (is_object($produto)) {
+            return !empty($produto->nome) ? $produto->nome : (isset($produto->descricao) ? $produto->descricao : '');
+        } elseif (is_array($produto)) {
+            return !empty($produto['nome']) ? $produto['nome'] : (isset($produto['descricao']) ? $produto['descricao'] : '');
+        }
+        
+        return '';
+    }
+}

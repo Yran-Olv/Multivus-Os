@@ -167,7 +167,7 @@
                                         foreach ($produtos as $p) {
                                             $totalProdutos = $totalProdutos + $p->subTotal;
                                             echo '<tr>';
-                                            echo '<td style="text-align: center">' . $p->descricao . '</td>';
+                                            echo '<td style="text-align: center">' . getNomeProduto($p) . '</td>';
                                             echo '<td style="text-align: center">' . $p->quantidade . '</td>';
 
                                             echo '<td style="text-align: center">R$ ' . number_format($p->subTotal, 2, ',', '.') . '</td>';

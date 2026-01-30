@@ -168,7 +168,7 @@ if (!empty($result->cidade) || !empty($result->estado) || !empty($result->cep)) 
                                             <?php $totalProdutos += $p->subTotal; ?>
                                             <tr>
                                                 <td style="width: 10%;"><?php echo $p->codDeBarra; ?></td>
-                                                <td style="width: 70%;"><?php echo $p->descricao; ?></td>
+                                                <td style="width: 70%;"><?php echo getNomeProduto($p); ?></td>
                                                 <td style="width: 5%;"><?php echo $p->quantidade; ?></td>
                                                 <td style="width: 10%;">R$ <?php echo($p->preco ?: $p->precoVenda); ?></td>
                                                 <td style="width: 10%;">R$ <?php echo number_format($p->subTotal, 2, ',', '.'); ?></td>

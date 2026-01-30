@@ -2,6 +2,24 @@
   select {
     width: 70px;
   }
+  .produto-imagem {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+  }
+  .produto-imagem-placeholder {
+    width: 50px;
+    height: 50px;
+    background: #f0f0f0;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 20px;
+  }
 </style>
 <div class="new122">
     <div class="widget-title" style="margin: -20px 0 0">
@@ -38,6 +56,7 @@
             <table id="tabela" class="table table-bordered ">
                 <thead>
                 <tr>
+                    <th>Imagem</th>
                     <th>Cod.</th>
                     <th>Cod. Barra</th>
                     <th>Nome</th>
@@ -51,16 +70,30 @@
 
                 if (!$results) {
                     echo '<tr>
-                                    <td colspan="6">Nenhum Produto Cadastrado</td>
+                                    <td colspan="7">Nenhum Produto Cadastrado</td>
                                     </tr>';
                 }
         foreach ($results as $r) {
+            $nomeProduto = getNomeProduto($r);
+            $imagemProduto = null;
+            if (!empty($r->imagem) && file_exists(FCPATH . 'assets/produtos/' . $r->imagem)) {
+                $imagemProduto = base_url('assets/produtos/' . $r->imagem);
+            }
+            
             echo '<tr>';
+            echo '<td>';
+            if ($imagemProduto) {
+                echo '<img src="' . $imagemProduto . '" alt="' . htmlspecialchars($nomeProduto) . '" class="produto-imagem" onerror="this.style.display=\'none\'; this.nextElementSibling.style.display=\'flex\';">';
+                echo '<div class="produto-imagem-placeholder" style="display: none;"><i class="fas fa-box"></i></div>';
+            } else {
+                echo '<div class="produto-imagem-placeholder"><i class="fas fa-box"></i></div>';
+            }
+            echo '</td>';
             echo '<td>' . $r->idProdutos . '</td>';
             echo '<td>' . $r->codDeBarra . '</td>';
-            echo '<td>' . $r->descricao . '</td>';
+            echo '<td>' . htmlspecialchars($nomeProduto) . '</td>';
             echo '<td>' . $r->estoque . '</td>';
-            echo '<td>' . number_format($r->precoVenda, 2, ',', '.') . '</td>';
+            echo '<td>R$ ' . number_format($r->precoVenda, 2, ',', '.') . '</td>';
             echo '<td>';
             if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vProduto')) {
                 echo '<a style="margin-right: 1%" href="' . base_url() . 'index.php/produtos/visualizar/' . $r->idProdutos . '" class="btn-nwe" title="Visualizar Produto"><i class="bx bx-show bx-xs"></i></a>  ';

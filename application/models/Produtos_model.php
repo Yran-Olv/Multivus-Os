@@ -14,8 +14,15 @@ class Produtos_model extends CI_Model
         $this->db->order_by('idProdutos', 'desc');
         $this->db->limit($perpage, $start);
         if ($where) {
+            $this->db->group_start();
             $this->db->like('codDeBarra', $where);
             $this->db->or_like('descricao', $where);
+            // Verificar se campo nome existe antes de usar
+            $fields = $this->db->list_fields($table);
+            if (in_array('nome', $fields)) {
+                $this->db->or_like('nome', $where);
+            }
+            $this->db->group_end();
         }
 
         $query = $this->db->get();

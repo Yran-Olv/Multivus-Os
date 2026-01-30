@@ -51,7 +51,7 @@
                     <tbody>
                         <?php foreach ($produtos as $produto): ?>
                         <tr>
-                            <td><?php echo $produto->descricao; ?></td>
+                            <td><?php echo getNomeProduto($produto); ?></td>
                             <td><?php echo $produto->quantidade; ?></td>
                             <td>R$ <?php echo number_format($produto->preco, 2, ',', '.'); ?></td>
                             <td>R$ <?php echo number_format($produto->subTotal, 2, ',', '.'); ?></td>

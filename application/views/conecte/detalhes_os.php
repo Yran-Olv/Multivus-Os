@@ -119,7 +119,7 @@
 foreach ($produtos as $p) {
     $total = $total + $p->subTotal;
     echo '<tr>';
-    echo '<td>' . $p->descricao . '</td>';
+    echo '<td>' . getNomeProduto($p) . '</td>';
     echo '<td>R$ ' . number_format($p->preco, 2, ',', '.') . '</td>';
     echo '<td>' . $p->quantidade . '</td>';
     echo '<td>R$ ' . number_format($p->subTotal, 2, ',', '.') . '</td>';
